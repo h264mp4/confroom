@@ -1,0 +1,37 @@
+User
+    email Text
+    password ByteString
+    name Text
+    level Level
+    verified Bool
+    verifyKey Text
+    resetPasswordKey Text
+    UniqueEmail email
+    deriving Show
+
+Room
+    number  Text
+    available Bool
+    firstAdd UTCTime
+    validTime UTCTime
+    level Level
+    UniqueRoomNo number
+    deriving Show
+
+Record
+    userId UserId
+    roomId RoomId
+    day Day
+    timespan Timespan
+    bookingTime TimeOfDay
+    cancel Bool
+    deriving Show
+
+DayRecords
+    ids RecordId List
+    day Day
+    UniqueDay day
+    deriving Show
+
+
+-- By default this file is used in Model.hs (which is imported by Foundation.hs)
