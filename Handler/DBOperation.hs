@@ -1,10 +1,15 @@
-{-# LANGUAGE TupleSections, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Handler.DBOperation where
 
-import Import
-import Data.Time.Clock
-import Network.Mail.Smtp
+import Data.Time
+import Network.Mail.SMTP
 import Data.Maybe(fromJust)
+import Database.Persist.Sqlite
+import qualified Data.Text as T
+
+import Import
+import Handler.Utils
+import Handler.MiscTypes
 
 -- | All basic operations are defined here and will called by Handler or Widget.
 
@@ -12,44 +17,44 @@ import Data.Maybe(fromJust)
 -- | User Operaions: addNewUser editUserProfile deleteUser
 
 -- addNewUser :: User -> | TODO: WHAT's the return type??
-addNewUser newUser = runSqlite $ do
+addNewUser newUser = runSqlite ":memory:" $ do
     --runMigration migrateAll
     userExist <- selectList [UserEmail ==. (userEmail newUser)] [LimitTo 1]
-    if not null userExist
+    if not (null userExist)
        then do let errMsg = "User" ++ (show $ userEmail newUser) ++
                               "Already Exists, should use others"
                liftIO $ print errMsg
-               return errMsg
+               return ()
        else do
             newUserId <- insert newUser
-            return "OK"
+            return ()
 
-editUserProfile theUserId newInfo = runSqlite $ do
+editUserProfile theUserId newInfo = runSqlite ":memory:" $ do
     -- only name, password and level can be editted.
     update theUserId [ UserName     =. (userName newInfo), 
                        UserPassword =. (userPassword newInfo),
                        UserLevel    =. (userLevel newInfo)
                      ]
-    return "OK"
+    return ()
 
-deleteUser theUserId = runSqlite $ do
+deleteUser theUserId = runSqlite ":memory:" $ do
     delete theUserId
-    return "OK"
+    return ()
 
 ------------------------------------------------------------------------------------------
 -- | Room operations: addNewRoom, editRoomProfile, deleteRoom
-addNewRoon newRoom = runSqlite $ do
+addNewRoom newRoom = runSqlite ":memory:" $ do
     roomExist <- selectList [RoomNumber ==. (roomNumber newRoom)] [LimitTo 1]
-    if not null userExist
-       then do let errMsg = "Room" ++ (show $ userEmail newUser) ++
+    if not (null roomExist)
+       then do let errMsg = "Room" ++ (show $ roomNumber newRoom) ++
                               "Already Exists, room configuration can be editted"
                liftIO $ print errMsg
-               return errMsg
+               return ()
        else do
             newRoomId <- insert newRoom
-            return "OK"
+            return ()
 
-editRoomProfile theRoomId newInfo = runSqlite $ do
+editRoomProfile theRoomId newInfo = runSqlite ":memory:" $ do
     -- Only the following field can be changed
     update theRoomId [ RoomAvailable =. (roomAvailable newInfo), 
                        RoomValidTime =. (roomValidTime newInfo),
@@ -57,16 +62,17 @@ editRoomProfile theRoomId newInfo = runSqlite $ do
                      ]
     return "OK"
 
-deleteRoom theRoomId = runSqlite $ do
+deleteRoom theRoomId = runSqlite ":memory:" $ do
     delete theRoomId
-    return "OK"
+    return ()
 
 ------------------------------------------------------------------------------------------
 -- | Booking management: bookingRoom,  deleteABooking
 
 data BookingStatus = BookingCancel | BookingSuccess
 
-bookingRoom theUserId theRoomId timespan = runSqlite $ do
+-- | TODO: we should check timespan overlapping
+bookingRoom theUserId theRoomId timespan = runSqlite ":memory:" $ do
     curDT <- liftIO $ getCurDayAndTime
     let curDay = localDay curDT
         curTime = localTimeOfDay curDT
@@ -81,14 +87,17 @@ bookingRoom theUserId theRoomId timespan = runSqlite $ do
     -- we add this new recordId to DayRecords
     maybeDay <- getBy $ UniqueDay curDay
     case maybeDay of
-        Nothing -> insert $ DayRecords [newRecordId] curDay >> return ()
+        Nothing -> do
+                   insert $ DayRecords [newRecordId] curDay
+                   return ()
         Just (Entity existId records) -> do
             let existRecords  = dayRecordsIds records
                 updateRecords = existRecords ++ [newRecordId]
-            update existId [recordIds =. updateRecords] >> return ()
+            update existId [DayRecordsIds =. updateRecords]
+            return ()
 
 -- TODO: return type??
-cancelABooking recordId = runSqlite $ do
+cancelABooking recordId = runSqlite ":memory:" $ do
     maybeRecord <- get recordId
     case maybeRecord of
         Nothing -> return ()
@@ -98,8 +107,8 @@ cancelABooking recordId = runSqlite $ do
                   aRoomId = recordRoomId aRecord
               maybeUser <- get aUserId          
               maybeRoom <- get aRoomId
-              liftIO $ emailCancelNotification aRecord (fromJust maybeUser) 
-                                               (fromJust maybeRoom) BookingCancel
+              liftIO $ emailNotification aRecord (fromJust maybeUser) 
+                                         (fromJust maybeRoom) BookingCancel
               return ()
 
 ------------------------------------------------------------------------------------------
@@ -108,55 +117,42 @@ emailNotification :: Record -> User -> Room -> BookingStatus -> IO ()
 emailNotification aRecord aUser aRoom status = do
     let adminUserName = "testConfroom" -- 163 username and passphrase
         adminPassword = "testConfroom123"
-        viaHost       = "smtp.163.com"
-        viaPort       = 25
+        viaHost       = T.pack "smtp.163.com"
+        viaPort       = T.pack $ show 25
 
-    let emailText = userEmail aUser
-        nameText  = userName  aUser
-        roomText  = roomNumber aRoom
-        date      = recordDay aRecord
-        timespan  = recordTimespan aRecord
+-- formatTime defaultTimeLocale "%F | %T" x 
+
+    let emailText  = userEmail aUser
+        nameText   = userName  aUser
+        roomText   = roomNumber aRoom
+        theDay     = recordDay aRecord
+        timespan   = recordTimespan aRecord
         statusText = getStatusText status
+        (year, month, day)   = toGregorian theDay
+        (startTime, endTime) = timeSpanToTimeString timespan
 
     -- create the email
-    let fromAddress = Address (Just "Conference Room Admin") (show viaPort)
-        toAddress   = [emailText]
+    let fromAddress = Address (Just $ T.pack "Conference Room Admin") 
+                              (T.pack "testConfromm@163.com")
+        toAddress   = [Address (Just nameText) emailText]
         ccAddress   = []
         bccAddress  = []
-        subject     = statusText !! 0 ++ ": " ++ "Conference Room " ++ roomText
- 
-    sendmailWithLogin' viaHost viaPort adminUsername adminPassword theMail 
+        subject     = T.pack (statusText !! 0 ++ ": " ++ "Conference Room " ++ 
+                              T.unpack roomText ++ ", " ++ startTime ++ "--" ++ endTime)
+        allParts    = plainTextPart (T.pack "This is a test")
+        theMail     = simpleMail fromAddress toAddress ccAddress bccAddress subject allParts
+
+    sendMailWithLogin' viaHost viaPort adminUserName adminPassword theMail 
     return ()  
 
 getStatusText status | status == BookingSuccess = ["Booking Success Notification", ""]
                      | status == BookingCancel  = ["Booking Cancel Notification", ""]
-User
-    email Text
-    password ByteString
-    name Text
-    level Level
-    verified Bool
-    verifyKey Text
-    resetPasswordKey Text
-    UniqueEmail email
-    deriving Show
+                     | otherwise = ["",""]
 
-Room
-    number  Text
-    available Bool
-    firstAdd UTCTime
-    validTime UTCTime
-    level Level
-    UniqueRoomNo number
-    deriving Show
-
-Record
-    userId UserId
-    roomId RoomId
-    day Day
-    timespan Timespan
-    bookingTime TimeOfDay
-    cancel Bool
-    deriving Show
-
-        
+timeSpanToTimeString (Timespan start end) = 
+                    let startHour = todHour start 
+                        startMin  = todMin start
+                        endHour = todHour end 
+                        endMin  = todMin end
+                     in (show startHour ++ ":" ++ show startMin,
+                         show endHour ++ ":" ++ show endMin)

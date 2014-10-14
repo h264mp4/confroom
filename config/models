@@ -28,7 +28,7 @@ Record
     deriving Show
 
 DayRecords
-    ids RecordId List
+    ids [RecordId]
     day Day
     UniqueDay day
     deriving Show

@@ -19,6 +19,7 @@ import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
+import Handler.MiscTypes
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -158,12 +159,12 @@ instance YesodAuthAccount (AccountPersistDB App User) App where
     runAccountDB = runAccountPersistDB
 
 instance PersistUserCredentials User where
-    userUsernameF = UserUsername
+    userUsernameF = UserName
     userPasswordHashF = UserPassword
-    userEmailF = UserEmailAddress
+    userEmailF = UserEmail
     userEmailVerifiedF = UserVerified
     userEmailVerifyKeyF = UserVerifyKey
     userResetPwdKeyF = UserResetPasswordKey
-    uniqueUsername = UniqueUsername
+    uniqueUsername = UniqueEmail
 
-    userCreate name email key pwd = User name pwd email False key ""
+    userCreate name email key pwd = User email pwd name AuthNormal False key ""

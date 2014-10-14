@@ -1,14 +1,11 @@
-module Handler.Utils where(
-       getCurDayAndTime
-    )
+module Handler.Utils where
 
-
-import Data.Time.Clock
-import Data.Time.LocalTime
+import Import
+import Data.Time
 
 getCurDayAndTime :: IO LocalTime
 getCurDayAndTime = do
     timeZ <- getCurrentTimeZone
-    utcT  <- getCurrenTime
+    utcT  <- getCurrentTime
     return $ utcToLocalTime timeZ utcT
 

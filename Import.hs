@@ -14,8 +14,6 @@ import           Model                as Import
 import           Settings             as Import
 import           Settings.Development as Import
 import           Settings.StaticFiles as Import
-import           Handler.Utils        as Import
-import           Handler.DBOperation  as Import
 
 #if __GLASGOW_HASKELL__ >= 704
 import           Data.Monoid          as Import
