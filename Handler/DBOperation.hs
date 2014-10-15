@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 module Handler.DBOperation where
 
-import Data.Time
 import Network.Mail.SMTP
 import Data.Maybe(fromJust)
 import Database.Persist.Class
@@ -64,10 +63,10 @@ addNewRoom newRoom = do
        then do let errMsg = "Room" ++ (show $ roomNumber newRoom) ++
                               "Already Exists, room configuration can be editted"
                liftIO $ print errMsg
-               return ()
+               return Nothing
        else do
             newRoomId <- insert newRoom
-            return ()
+            return $ Just newRoomId
 
 editRoomProfile theRoomId newInfo = do
     -- Only the following field can be changed
@@ -85,31 +84,34 @@ deleteRoom theRoomId = do
 -- | Booking management: bookingRoom,  deleteABooking
 
 -- | TODO: we should check timespan overlapping
-bookingRoom theUserId theRoomId timespan = do
-    curDT <- liftIO $ getCurDayAndTime
-    let curDay = localDay curDT
-        curTime = localTimeOfDay curDT
-        newRecord = Record theUserId theRoomId curDay timespan curTime False
-    newRecordId <- insert newRecord
-    maybeUser <- get theUserId
-    maybeRoom <- get theRoomId
-    -- email the user
-    liftIO $ emailNotification newRecord (fromJust maybeUser) 
+bookingRoom theUserId theRoomId theDay timespan = do
+    -- check whether the record exist
+    maybeExist <- getBy $ UniqueRecord theUserId theRoomId theDay timespan
+    case maybeExist of 
+        Just (Entity theId theValue) -> return theId
+        Nothing -> do
+            curTime <- liftIO $ getCurrentTime
+            let newRecord = Record theUserId theRoomId theDay timespan curTime False          
+            newRecordId <- insert newRecord
+            maybeUser <- get theUserId
+            maybeRoom <- get theRoomId
+
+            -- email the user
+            liftIO $ emailNotification newRecord (fromJust maybeUser) 
                                (fromJust maybeRoom) BookingSuccess 
 
-    -- we add this new recordId to DayRecords
-    maybeDay <- getBy $ UniqueDay curDay
-    case maybeDay of
-        Nothing -> do
-                   insert $ DayRecords [newRecordId] curDay
-                   return ()
-        Just (Entity existId records) -> do
-            let existRecords  = dayRecordsIds records
-                updateRecords = existRecords ++ [newRecordId]
-            update existId [DayRecordsIds =. updateRecords]
-            return ()
+            -- we add this new recordId to DayRecords
+            maybeDay <- getBy $ UniqueDay theDay
+            case maybeDay of
+                Nothing -> do
+                    newId <- insert $ DayRecords [newRecordId] theDay
+                    return newRecordId
+                Just (Entity existId records) -> do
+                    let existRecords = dayRecordsIds records
+                        updateRecords = existRecords ++ [newRecordId]
+                    update existId [DayRecordsIds =. updateRecords]
+                    return newRecordId
 
--- TODO: return type??
 cancelABooking recordId = do
     maybeRecord <- get recordId
     case maybeRecord of
@@ -133,8 +135,6 @@ emailNotification aRecord aUser aRoom status = do
         viaHost       = "smtp.163.com"
         viaPort       = 25
 
--- formatTime defaultTimeLocale "%F | %T" x 
-
     let emailText  = userEmail aUser
         nameText   = userName  aUser
         roomText   = roomNumber aRoom
@@ -146,16 +146,17 @@ emailNotification aRecord aUser aRoom status = do
 
     -- create the email
     let fromAddress = Address (Just $ T.pack "Conference Room Admin") 
-                              (T.pack "testConfromm@163.com")
+                              (T.pack "testConfroom@163.com")
         toAddress   = [Address (Just nameText) emailText]
         ccAddress   = []
         bccAddress  = []
         subject     = T.pack (statusText !! 0 ++ ": " ++ "Conference Room " ++ 
-                              T.unpack roomText ++ ", " ++ startTime ++ "--" ++ endTime)
+                              T.unpack roomText ++ " [from " ++ startTime ++ " to " ++ endTime ++ 
+                              ", " ++ show year ++ "-" ++ show month ++ "-" ++ show day ++ "]")
         allParts    = plainTextPart (TL.pack "This is a test")
         theMail     = simpleMail fromAddress toAddress ccAddress bccAddress subject [allParts]
 
-    sendMailWithLogin' viaHost viaPort adminUserName adminPassword theMail 
+    sendMailWithLogin viaHost adminUserName adminPassword theMail 
     return ()  
 
 getStatusText status | status == BookingSuccess = ["Booking Success Notification", ""]

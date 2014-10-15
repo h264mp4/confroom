@@ -23,8 +23,9 @@ Record
     roomId RoomId
     day Day
     timespan Timespan
-    bookingTime TimeOfDay
+    bookingTime UTCTime
     cancel Bool
+    UniqueRecord userId roomId day timespan
     deriving Show
 
 DayRecords

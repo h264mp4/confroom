@@ -27,3 +27,6 @@ infixr 5 <>
 (<>) :: Monoid m => m -> m -> m
 (<>) = mappend
 #endif
+
+-- other imports
+import           Data.Time            as Import hiding (parseTime)

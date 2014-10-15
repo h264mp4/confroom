@@ -4,6 +4,8 @@ module Handler.Home where
 import Import
 import Handler.DBOperation
 import Handler.MiscTypes
+import Handler.Utils
+import Data.Maybe(fromJust)
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -21,11 +23,30 @@ import Handler.MiscTypes
 -}
 
 
+testUser = User "peng_pxt@163.com" "hah" "peng" AuthNormal False "waht" "wahtandwhat"
+testRoom t1 t2 = Room "1001" True t1 t2 AuthNormal
+
+testBookingRoom aDay curTime t1 = do
+    mayUserId <- runDB $ addNewUser testUser
+    mayRoomId <- runDB $ addNewRoom (testRoom t1 t1)
+    runDB $ bookingRoom (fromJust mayUserId) (fromJust mayRoomId) aDay (Timespan curTime curTime)
+    
+
 getHomeR :: Handler Html
 getHomeR = do
     (formWidget, formEnctype) <- generateFormPost sampleForm
     let submission = Nothing :: Maybe (FileInfo, Text)
         handlerName = "getHomeR" :: Text
+
+    curDT <- liftIO getCurDayAndTime
+    let curDay = localDay curDT
+        curTime = localTimeOfDay curDT
+
+    t1 <- liftIO $ getCurrentTime
+
+    theId <- testBookingRoom curDay curTime t1
+    runDB $ cancelABooking theId
+
     defaultLayout $ do
         aDomId <- newIdent
         setTitle "Welcome To Yesod!"
