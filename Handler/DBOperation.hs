@@ -4,7 +4,6 @@ module Handler.DBOperation where
 import Data.Time
 import Network.Mail.SMTP
 import Data.Maybe(fromJust)
-import Database.Persist.Sqlite
 import Database.Persist.Class
 import Database.Persist.Types
 
@@ -30,20 +29,20 @@ data InfoKey = InfoUser | InfoRoom | InfoRecord
 ------------------------------------------------------------------------------------------
 -- | User Operaions: addNewUser editUserProfile deleteUser
 
--- addNewUser :: User -> | TODO: WHAT's the return type??
-addNewUser newUser = runSqlite ":memory:" $ do
+-- addNewUser : return Maybe (Key User)
+addNewUser newUser = do
     --runMigration migrateAll
     userExist <- selectList [UserEmail ==. (userEmail newUser)] [LimitTo 1]
     if not (null userExist)
        then do let errMsg = "User" ++ (show $ userEmail newUser) ++
                               "Already Exists, should use others"
                liftIO $ print errMsg
-               return ()
+               return Nothing
        else do
             newUserId <- insert newUser
-            return ()
+            return $ Just newUserId
 
-editUserProfile theUserId newInfo = runSqlite ":memory:" $ do
+editUserProfile theUserId newInfo = do
     -- only name, password and level can be editted.
     update theUserId [ UserName     =. (userName newInfo), 
                        UserPassword =. (userPassword newInfo),
@@ -51,13 +50,15 @@ editUserProfile theUserId newInfo = runSqlite ":memory:" $ do
                      ]
     return ()
 
-deleteUser theUserId = runSqlite ":memory:" $ do
+deleteUser theUserId = do
+    liftIO $ print "delete : " 
+    liftIO $ print theUserId
     delete theUserId
     return ()
 
 ------------------------------------------------------------------------------------------
 -- | Room operations: addNewRoom, editRoomProfile, deleteRoom
-addNewRoom newRoom = runSqlite ":memory:" $ do
+addNewRoom newRoom = do
     roomExist <- selectList [RoomNumber ==. (roomNumber newRoom)] [LimitTo 1]
     if not (null roomExist)
        then do let errMsg = "Room" ++ (show $ roomNumber newRoom) ++
@@ -68,7 +69,7 @@ addNewRoom newRoom = runSqlite ":memory:" $ do
             newRoomId <- insert newRoom
             return ()
 
-editRoomProfile theRoomId newInfo = runSqlite ":memory:" $ do
+editRoomProfile theRoomId newInfo = do
     -- Only the following field can be changed
     update theRoomId [ RoomAvailable =. (roomAvailable newInfo), 
                        RoomValidTime =. (roomValidTime newInfo),
@@ -76,7 +77,7 @@ editRoomProfile theRoomId newInfo = runSqlite ":memory:" $ do
                      ]
     return "OK"
 
-deleteRoom theRoomId = runSqlite ":memory:" $ do
+deleteRoom theRoomId = do
     delete theRoomId
     return ()
 
@@ -84,7 +85,7 @@ deleteRoom theRoomId = runSqlite ":memory:" $ do
 -- | Booking management: bookingRoom,  deleteABooking
 
 -- | TODO: we should check timespan overlapping
-bookingRoom theUserId theRoomId timespan = runSqlite ":memory:" $ do
+bookingRoom theUserId theRoomId timespan = do
     curDT <- liftIO $ getCurDayAndTime
     let curDay = localDay curDT
         curTime = localTimeOfDay curDT
@@ -109,7 +110,7 @@ bookingRoom theUserId theRoomId timespan = runSqlite ":memory:" $ do
             return ()
 
 -- TODO: return type??
-cancelABooking recordId = runSqlite ":memory:" $ do
+cancelABooking recordId = do
     maybeRecord <- get recordId
     case maybeRecord of
         Nothing -> return ()
@@ -173,7 +174,7 @@ timeSpanToTimeString (Timespan start end) =
 -- | Lookup functions
 
 -- lookup by day: used when render the main page show one day's booking status
-getRecordIdsByDay theDay = runSqlite ":memory:" $ do
+getRecordIdsByDay theDay = do
     maybeDay <- getBy $ UniqueDay theDay
     case maybeDay of
         Nothing -> do
@@ -182,7 +183,7 @@ getRecordIdsByDay theDay = runSqlite ":memory:" $ do
         Just (Entity theId theRecords) -> return $ Just (theId, dayRecordsIds theRecords)
 
 -- lookup by id: User or Room
-getOnePieceInfoByDBId theId = runSqlite ":memory:" $ do
+getOnePieceInfoByDBId theId = do
     maybeValue <- get theId
     case maybeValue of
         Nothing -> do
@@ -193,7 +194,7 @@ getOnePieceInfoByDBId theId = runSqlite ":memory:" $ do
 
 -- lookup a user's booking info: little complex, return a list of [(recordId, Record, User, Room)]
 -- uniqueKey could be [roomId or userId]
-getUserBookingInfosByUserEmail theEmail bHistory = runSqlite ":memory:" $ do
+getUserBookingInfosByUserEmail theEmail bHistory = do
     curDT <- liftIO $ getCurDayAndTime
     let curDay = localDay curDT
         curTime = localTimeOfDay curDT
@@ -216,7 +217,7 @@ getUserBookingInfosByUserEmail theEmail bHistory = runSqlite ":memory:" $ do
     getRecordIdsFromDayRecordsEntity (Entity _ aDayRecords) = dayRecordsIds aDayRecords
 
  
-marshalOneRecordToTypeValues (Entity aRecordId aRecord) = runSqlite ":memory:" $ do
+marshalOneRecordToTypeValues (Entity aRecordId aRecord) = do
     maybeUser <- get (recordUserId aRecord)
     maybeRoom <- get (recordRoomId aRecord)
     return (aRecordId, aRecord, fromJust maybeUser, fromJust maybeRoom)
@@ -224,7 +225,7 @@ marshalOneRecordToTypeValues (Entity aRecordId aRecord) = runSqlite ":memory:" $
 ------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
 -- other helpers, may not be used
-getUserIdByUniqueUserEmail theEmail = runSqlite ":memory:" $ do
+getUserIdByUniqueUserEmail theEmail = do
     maybeUser <- getBy $ UniqueEmail theEmail
     case maybeUser of
         Nothing -> return Nothing
