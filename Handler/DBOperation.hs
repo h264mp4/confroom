@@ -1,17 +1,31 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, FlexibleContexts #-}
 module Handler.DBOperation where
 
 import Data.Time
 import Network.Mail.SMTP
 import Data.Maybe(fromJust)
 import Database.Persist.Sqlite
+import Database.Persist.Class
+import Database.Persist.Types
+
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
+import qualified Data.ByteString as BS
+import qualified Data.Map as M
 
 import Import
 import Handler.Utils
 import Handler.MiscTypes
 
 -- | All basic operations are defined here and will called by Handler or Widget.
+
+------------------------------------------------------------------------------------------
+-- | Some types and constants
+
+data BookingStatus = BookingCancel | BookingSuccess
+    deriving (Show, Eq, Ord)
+
+data InfoKey = InfoUser | InfoRoom | InfoRecord
 
 ------------------------------------------------------------------------------------------
 -- | User Operaions: addNewUser editUserProfile deleteUser
@@ -69,8 +83,6 @@ deleteRoom theRoomId = runSqlite ":memory:" $ do
 ------------------------------------------------------------------------------------------
 -- | Booking management: bookingRoom,  deleteABooking
 
-data BookingStatus = BookingCancel | BookingSuccess
-
 -- | TODO: we should check timespan overlapping
 bookingRoom theUserId theRoomId timespan = runSqlite ":memory:" $ do
     curDT <- liftIO $ getCurDayAndTime
@@ -117,8 +129,8 @@ emailNotification :: Record -> User -> Room -> BookingStatus -> IO ()
 emailNotification aRecord aUser aRoom status = do
     let adminUserName = "testConfroom" -- 163 username and passphrase
         adminPassword = "testConfroom123"
-        viaHost       = T.pack "smtp.163.com"
-        viaPort       = T.pack $ show 25
+        viaHost       = "smtp.163.com"
+        viaPort       = 25
 
 -- formatTime defaultTimeLocale "%F | %T" x 
 
@@ -139,8 +151,8 @@ emailNotification aRecord aUser aRoom status = do
         bccAddress  = []
         subject     = T.pack (statusText !! 0 ++ ": " ++ "Conference Room " ++ 
                               T.unpack roomText ++ ", " ++ startTime ++ "--" ++ endTime)
-        allParts    = plainTextPart (T.pack "This is a test")
-        theMail     = simpleMail fromAddress toAddress ccAddress bccAddress subject allParts
+        allParts    = plainTextPart (TL.pack "This is a test")
+        theMail     = simpleMail fromAddress toAddress ccAddress bccAddress subject [allParts]
 
     sendMailWithLogin' viaHost viaPort adminUserName adminPassword theMail 
     return ()  
@@ -156,3 +168,64 @@ timeSpanToTimeString (Timespan start end) =
                         endMin  = todMin end
                      in (show startHour ++ ":" ++ show startMin,
                          show endHour ++ ":" ++ show endMin)
+
+------------------------------------------------------------------------------------------
+-- | Lookup functions
+
+-- lookup by day: used when render the main page show one day's booking status
+getRecordIdsByDay theDay = runSqlite ":memory:" $ do
+    maybeDay <- getBy $ UniqueDay theDay
+    case maybeDay of
+        Nothing -> do
+                   liftIO $ print "invlaid day as the key, no corresponding records"
+                   return Nothing
+        Just (Entity theId theRecords) -> return $ Just (theId, dayRecordsIds theRecords)
+
+-- lookup by id: User or Room
+getOnePieceInfoByDBId theId = runSqlite ":memory:" $ do
+    maybeValue <- get theId
+    case maybeValue of
+        Nothing -> do
+                   liftIO $ print "invlaid id as the key, no corresponding values"
+                   liftIO $ print theId 
+                   return Nothing
+        Just (Entity _ aPiece) -> return $ Just aPiece
+
+-- lookup a user's booking info: little complex, return a list of [(recordId, Record, User, Room)]
+-- uniqueKey could be [roomId or userId]
+getUserBookingInfosByUserEmail theEmail bHistory = runSqlite ":memory:" $ do
+    curDT <- liftIO $ getCurDayAndTime
+    let curDay = localDay curDT
+        curTime = localTimeOfDay curDT
+        selectOperation = if bHistory then (<=.) else (>=.)
+
+    maybeValue <- getBy $ UniqueEmail theEmail
+    case maybeValue of
+        Nothing -> do
+                   liftIO $ print "invlaid key, no corresponding value."
+                   return []
+        Just (Entity theUserId _) -> do
+            theDayRecordsEntityList <- selectList [DayRecordsDay `selectOperation` curDay] []
+            let theRecordsKeyList = concat . map getRecordIdsFromDayRecordsEntity $ 
+                                                 (theDayRecordsEntityList)
+            theRecordsList <- selectList [RecordId <-. theRecordsKeyList] []
+            let matchRecordsList = filter (\ (Entity _ r) -> recordUserId r == theUserId) 
+                                          theRecordsList
+            mapM marshalOneRecordToTypeValues matchRecordsList
+    where
+    getRecordIdsFromDayRecordsEntity (Entity _ aDayRecords) = dayRecordsIds aDayRecords
+
+ 
+marshalOneRecordToTypeValues (Entity aRecordId aRecord) = runSqlite ":memory:" $ do
+    maybeUser <- get (recordUserId aRecord)
+    maybeRoom <- get (recordRoomId aRecord)
+    return (aRecordId, aRecord, fromJust maybeUser, fromJust maybeRoom)
+ 
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+-- other helpers, may not be used
+getUserIdByUniqueUserEmail theEmail = runSqlite ":memory:" $ do
+    maybeUser <- getBy $ UniqueEmail theEmail
+    case maybeUser of
+        Nothing -> return Nothing
+        Just (Entity theId auser) -> return $ Just theId
