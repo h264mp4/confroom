@@ -39,6 +39,7 @@ data App = App
 instance HasHttpManager App where
     getHttpManager = httpManager
 
+-- add our owns
 prettyTime :: UTCTime -> String
 prettyTime = formatTime defaultTimeLocale "%B %e, %Y %r"
 
@@ -83,10 +84,14 @@ instance Yesod App where
                 , css_bootstrap_theme_3_2_0_css
                 , css_jquery_ui_1_11_2_min_css
                 ])
-
--- bootstrap-3.2.0.js  jquery-1.11.1.min.js  jquery-ui-1.11.2
-
+            $(combineScripts 'StaticR
+                 [ js_bootstrap_3_2_0_js
+                 , js_jquery_1_11_1_min_js
+                 , js_jquery_ui_1_11_2_js 
+                 ])
+            
             $(widgetFile "default-layout")
+
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- This is done to provide an optimization for serving static files from
