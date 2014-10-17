@@ -44,8 +44,8 @@ getHomeR = do
 
     t1 <- liftIO $ getCurrentTime
 
-    theId <- testBookingRoom curDay curTime t1
-    runDB $ cancelABooking theId
+    --theId <- testBookingRoom curDay curTime t1
+    --runDB $ cancelABooking theId
 
     defaultLayout $ do
         aDomId <- newIdent

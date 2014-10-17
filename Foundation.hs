@@ -20,6 +20,8 @@ import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
 import Handler.MiscTypes
+import Data.Time
+import System.Locale
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -36,6 +38,9 @@ data App = App
 
 instance HasHttpManager App where
     getHttpManager = httpManager
+
+prettyTime :: UTCTime -> String
+prettyTime = formatTime defaultTimeLocale "%B %e, %Y %r"
 
 -- Set up i18n messages. See the message folder.
 mkMessage "App" "messages" "en"
@@ -74,9 +79,13 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR
-                [ css_normalize_css
-                , css_bootstrap_css
+                [ css_bootstrap_3_2_0_css
+                , css_bootstrap_theme_3_2_0_css
+                , css_jquery_ui_1_11_2_min_css
                 ])
+
+-- bootstrap-3.2.0.js  jquery-1.11.1.min.js  jquery-ui-1.11.2
+
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
