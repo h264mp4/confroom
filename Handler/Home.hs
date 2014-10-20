@@ -55,9 +55,15 @@ postHomeR :: Handler Html
 postHomeR = do
     defaultLayout $ do
         aDomId <- newIdent
+        addScript $ StaticR kalendae_kalendae_standalone_js 
+        addStylesheet $ StaticR kalendae_kalendae_css
         $(widgetFile "homepage")
 
 sampleForm :: Form (FileInfo, Text)
 sampleForm = renderDivs $ (,)
     <$> fileAFormReq "Choose a file"
     <*> areq textField "What's on the file?" Nothing
+
+
+--    <link rel="stylesheet" href="build/kalendae.css" type="text/css" charset="utf-8">
+--    <script src="build/kalendae.standalone.js" type="text/javascript" charset="utf-8"></script>

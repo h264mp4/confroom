@@ -83,14 +83,16 @@ instance Yesod App where
                 [ css_bootstrap_3_2_0_css
                 , css_bootstrap_theme_3_2_0_css
                 , css_jquery_ui_1_11_2_min_css
+                , kalendae_kalendae_css
                 ])
             $(combineScripts 'StaticR
                  [ js_bootstrap_3_2_0_js
                  , js_jquery_1_11_1_min_js
                  , js_jquery_ui_1_11_2_js 
+                 , kalendae_kalendae_standalone_js
                  ])
-            
-            $(widgetFile "default-layout")
+
+            widget
 
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 

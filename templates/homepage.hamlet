@@ -3,8 +3,8 @@
     <div class="col-md-2" id="left-nav">
         <div class="row" id="hello-section">
 
-             <div class="col-md-10 col-md-offset-1">
-                  <pre>你好, <b>wtl</b>
+             <div class="col-md-11 col-md-offset-1">
+                  <pre><h5>你好, <b>wtl</b>
 
         <div class="row" id="functionalities">
             <div class="col-md-12">
@@ -32,4 +32,9 @@
 
     <!-- the main content -->
     <div class="col-md-10" id="maincontent">       
-        <p>Date: <input type="text" id="datepicker">             
+        <p>Date: <input type="text" id="datepicker">
+        <div class="row">
+            <div class="col-md-2">
+                 <h4> 预订查询 
+            <div class="col-md-10">
+                  <div class="auto-kal" data-kal="months: 3, direction: 'future'" >
