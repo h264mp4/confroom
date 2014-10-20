@@ -53,12 +53,6 @@ getHomeR = do
 
 postHomeR :: Handler Html
 postHomeR = do
-    ((result, formWidget), formEnctype) <- runFormPost sampleForm
-    let handlerName = "postHomeR" :: Text
-        submission = case result of
-            FormSuccess res -> Just res
-            _ -> Nothing
-
     defaultLayout $ do
         aDomId <- newIdent
         $(widgetFile "homepage")
