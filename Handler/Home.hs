@@ -55,8 +55,8 @@ postHomeR :: Handler Html
 postHomeR = do
     defaultLayout $ do
         aDomId <- newIdent
-        addScript $ StaticR kalendae_kalendae_standalone_js 
-        addStylesheet $ StaticR kalendae_kalendae_css
+        --addScript $ StaticR kalendae_kalendae_standalone_js 
+        --addStylesheet $ StaticR kalendae_kalendae_css
         $(widgetFile "homepage")
 
 sampleForm :: Form (FileInfo, Text)

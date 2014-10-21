@@ -26,13 +26,16 @@ $newline never
                     <img src="/static/img/logo-banner.jpg">
                 <div class="col-md-4 ">
                     <h3>会议室管理系统
-            <hr>
+            <div class="row">
+                <div class="col-md-10 ">
+                    <hr>
 
             <div class="row" id="main" role="main">
-                ^{pageBody pc}
+                <div class="col-md-10 ">
+                    ^{pageBody pc}
 
             <div class="row" id="separator">
                 <br><br><br>
             <div class="row">
-                <div class="col-md-12 ">
+                <div class="col-md-10 ">
                     <pre align="center"> <em><b>Physics</b></em> © 2014 Peking University All Right Reserved </pre>
