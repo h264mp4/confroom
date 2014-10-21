@@ -1,25 +1,24 @@
 
 $(document).ready(function() {
-    console.log("we are ongoing.");
 
+    console.log("we are ongoing.");
 
     /*kalendae doesn't depend on jquery, but still put it here. */     
     window.moment = Kalendae.moment;
     var utilDate = moment().add(2, 'months');
-    console.log(utilDate);
     $("#myQueryDataDiv").kalendae({
         /* format: 'D/M/YYYY', // Set calendar date format */
         /* Set calendar date with same format as calendar expect */
+        userYearNav: false,
         direction: 'today-future', 
         months: 3,
         weekStart: 1,
-        userYearNav: false,
         blackout: function (date) {
             return date >= utilDate; // Blackout calendar days that are greater than utilDate
         },
         subscribe: {
             'change': function (date, action) {
-                console.log(date, action, this.getSelected());
+                // console.log(date, action, this.getSelected());
             }, 
 
             'date-clicked': function (date, action) {
@@ -28,7 +27,7 @@ $(document).ready(function() {
             }
         }
     });
-
     console.log("finish kalendae");
 
+    
 });
