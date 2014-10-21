@@ -7,7 +7,7 @@
 	border-radius:5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
-	font-size:14px; /*12px*/
+	font-size:15px; /*12px*/
 	font-family:'Helvetica Neue', 'Helvetica';
 	cursor:default;
 	position:relative;
@@ -54,7 +54,7 @@
 .kalendae .k-calendar {
     display: inline-block;
     zoom:1;*display:inline;
-    width:220px; /*155*/
+    width:210px; /*155*/
     vertical-align:top;
 }
 
@@ -135,7 +135,7 @@
 .kalendae .k-title,
 .kalendae .k-header,
 .kalendae .k-days {
-	width:218px; /*154*/
+	width:190px; /*154*/
 	display:block;
 	overflow:hidden;
 }
@@ -156,17 +156,19 @@
 	margin:1px 1px;
 }
 
+/*Peng: this is weekheader, yi er san ...*/
 .kalendae .k-header span {
 	text-align:center;
 	font-weight:bold;
-	width:20px;
+	width:22px; /*20px*/
 	padding:1px 0;
 	color:#666;
 }
 
+/*Peng: this is day number, 1,2,3,4 ...*/
 .kalendae .k-days span {
 	text-align:right;
-	width:20px; /*13*/
+	width:22px; /*13*/
 	height:1.4em; /*1.1em*/
 	line-height:1.4em;/*1em*/
 	padding:3px 4px 3px 3px; /*2px 3px 2px 2px;*/
@@ -177,17 +179,24 @@
 	color:#999;
 }
 
-/** Today **/
-.kalendae .k-today {
-	text-decoration:underline;
-}
-
 /** Days inside of the month view **/
 .kalendae .k-days span.k-in-month.k-active {
 	border-color:#ddd;
 	background-color:#fff;
 	color:#333;
 }
+
+/** Today **/
+.kalendae span.k-in-month.k-active.k-today {
+    text-decoration:underline;
+    color:red; /*blueviolet;*/
+}
+
+.kalendae k-today {
+    text-decoration:underline;
+}
+
+
 /** Days outside of the month view (before the first day of the month, after the last day of the month) **/
 .kalendae .k-days span.k-out-of-month {color:#ddd;}
 
@@ -198,7 +207,7 @@
 
 /** Selected day, when outside the selectable area **/
 .kalendae .k-days span.k-selected {
-	border-color:#1072A5;
+	border-color:red;
 	color:#1072A5;
 }
 
@@ -206,6 +215,7 @@
 .kalendae .k-days span.k-selected.k-active {
 	background:#7EA0E2;
 	color:white;
+	border-color:red;
 }
 
 /** Days between the start and end points on a range, outside of the selectable area **/

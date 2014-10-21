@@ -25,7 +25,7 @@
             <div class="col-md-12">
                 <ul class="nav nav-pills nav-stacked">
                     <li> 
-                        <a href="##">会议室预订系统介绍
+                        <a href="##">会议室预订介绍
                     <li> 
                         <a href="##">其他介绍
 
@@ -39,4 +39,4 @@
                 <button class="btn btn-primary" type="button" id="new-booking">新的预订
         <div class="row">
             <div class="col-md-12">
-                  <div class="auto-kal" data-kal="months: 3, direction: 'future'" >
+                  <div id="myQueryDataDiv">
