@@ -1,14 +1,94 @@
+// Note, myTableDataReal myCalendarSelectDiv all can be replaced by newIndent.
+
+
+
 
 $(document).ready(function() {
 
-    console.log("we are ongoing.");
+    /* 1. first we define some global data and functions. */
+    var dTable;
+    // year-month-day, on server side, we call fromGregorian y m d to recreate the Day.
+    var queryDate = getDateStr(new Date()); 
+    console.log(queryDate);
+
+    function showCurrentQueryDate(){
+        var showDate = "<div id='tmpShowDate'> <img src='/static/images/show-date.png' align='left' width='48' height='48' />" + "<span>&nbsp当前查询日期： " + queryDate + "</span></div>";
+        $("#myShowDate").prepend(showDate);
+    }
+
+    function deleteCurrentQueryDate() {
+        var elem = document.getElementById("tmpShowDate");
+        elem.parentNode.removeChild(elem);
+    }
+
+    function getDateStr(dateObj) {
+        var year = dateObj.getUTCFullYear();
+        var month = dateObj.getUTCMonth() + 1; //months from 1-12
+        var day = dateObj.getUTCDate();
+         
+        var newDate = year + "-" + month + "-" + day;
+        return newDate; 
+    };
+
+    function setupDataTable(json, queryDay) {
+        console.log("start setup dataTable.");
+        var settings = {
+            "bJQueryUI": true,
+            "bProcessing": true,
+            //"bServerSide": true,
+            "bRetrieve": true,
+            "bSortable": false,
+            "bDestroy": true,
+            "bPaginate": false,
+            "sDom": '<"top"T<"clear">rt<"clear">>',
+            "sPaginationType": "full_numbers",
+            "bScrollCollapse": true,
+            "bScrollAutoCss": false,
+            "oColVis": {
+                "buttonText": "&nbsp;",
+                "bRestore": true,
+                "sAlign": "left"
+            },
+
+            "data": [queryDate],
+            "columns": [
+                { "title": "timeline" },
+                { "title": "07" },
+                { "title": "08" },
+                { "title": "09" },
+                { "title": "10" },
+                { "title": "11" },
+                { "title": "12" },
+                { "title": "13" },
+                { "title": "14" },
+                { "title": "15" },
+                { "title": "16" },
+                { "title": "17" },
+                { "title": "18" },
+                { "title": "19" },
+                { "title": "20" },
+                { "title": "21" },
+                { "title": "22" },
+                { "title": "23" },
+                { "title": "00" }
+                // { "title": "Grade", "class": "center" }
+            ]
+        }
+
+        dTable = $("#myTableDataReal").dataTable(settings);
+        console.log("finish setup dataTable.");
+    }
+
+    function destroyDataTable() {
+        dTable.fnDestroy();
+        $("#myTableDataReal").empty(); // this line is crutial for recreate the table.
+        deleteCurrentQueryDate();        
+    }
 
     /*kalendae doesn't depend on jquery, but still put it here. */     
     window.moment = Kalendae.moment;
     var utilDate = moment().add(2, 'months');
-    $("#myQueryDataDiv").kalendae({
-        /* format: 'D/M/YYYY', // Set calendar date format */
-        /* Set calendar date with same format as calendar expect */
+    $("#myCalendarSelectDiv").kalendae({
         userYearNav: false,
         direction: 'today-future', 
         months: 3,
@@ -16,18 +96,28 @@ $(document).ready(function() {
         blackout: function (date) {
             return date >= utilDate; // Blackout calendar days that are greater than utilDate
         },
-        subscribe: {
-            'change': function (date, action) {
-                // console.log(date, action, this.getSelected());
-            }, 
 
+        subscribe: {
             'date-clicked': function (date, action) {
-                console.log(date, action, this.getSelected());
-                // Future Process to Load the new show of query.
+                console.log("new selected date: " + date["_i"]);
+                queryDate = date["_i"];
+                console.log("the query date is: " + queryDate);
+
+                // 1. destroy the existing data table.
+                destroyDataTable();
+
+                // 2. make the $("#myTableDataDiv") a loading sign.
+                showCurrentQueryDate();
+
+                // 3. recreate the table
+                setupDataTable({}, queryDate);
             }
         }
     });
-    console.log("finish kalendae");
 
-    
+    console.log("finish kalendae");
+      
+    // we setup the initial dataTable
+    setupDataTable({}, queryDate);
+    showCurrentQueryDate();
 });

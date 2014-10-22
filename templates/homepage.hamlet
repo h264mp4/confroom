@@ -33,10 +33,15 @@
     <div class="col-md-10" id="maincontent">       
         <div class="row">
             <div class="col-md-8">
-                <img src="/static/images/queryNote.ico" align="left">
-                <h4> &nbsp按日期查询预订情况
+                <img src="/static/images/select-date.png" align="left" width="48" height="48" hspace="15">
+                <span style="font-size: 16pt; font-family:宋体" > &nbsp按日期查询预订情况
             <div class="col-md-4" align="right">
                 <button class="btn btn-primary" type="button" id="new-booking">新的预订
         <div class="row">
             <div class="col-md-12">
-                  <div id="myQueryDataDiv">
+                  <div id="myCalendarSelectDiv">
+        <div class="row">
+            <hr>
+            <div class="col-md-12" id="myShowDate"> 
+            <div class="col-md-12" id="myTableDataDiv">
+                <table id="myTableDataReal">

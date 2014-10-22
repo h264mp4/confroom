@@ -168,7 +168,7 @@
 
 /*Peng: this is day number, 1,2,3,4 ...*/
 .kalendae .k-days span {
-	text-align:right;
+	text-align:center;
 	width:22px; /*13*/
 	height:1.4em; /*1.1em*/
 	line-height:1.4em;/*1em*/
