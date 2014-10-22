@@ -33,7 +33,7 @@
     <div class="col-md-10" id="maincontent">       
         <div class="row">
             <div class="col-md-8">
-                <img src="/static/img/queryNote.ico" align="left">
+                <img src="/static/images/queryNote.ico" align="left">
                 <h4> &nbsp按日期查询预订情况
             <div class="col-md-4" align="right">
                 <button class="btn btn-primary" type="button" id="new-booking">新的预订

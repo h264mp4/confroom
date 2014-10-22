@@ -78,13 +78,14 @@ instance Yesod App where
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
 
+        --                 , js_jquery_ui_1_11_2_js 
         pc <- widgetToPageContent $ do
             $(combineScripts 'StaticR
                  [ js_jquery_1_11_1_min_js
-                 , js_jquery_ui_1_11_2_js 
                  , js_bootstrap_3_2_0_js
                  , js_moment_2_8_3_min_js
                  , kalendae_kalendae_standalone_js
+                 , js_jquery_dataTables_min_js
                  ])
 
             $(combineStylesheets 'StaticR
@@ -92,6 +93,8 @@ instance Yesod App where
                 , css_bootstrap_3_2_0_css
                 , css_bootstrap_theme_3_2_0_css
                 , kalendae_kalendae_css
+                , css_jquery_dataTables_min_css
+                , css_jquery_dataTables_themeroller_css
                 ])
 
             widget
