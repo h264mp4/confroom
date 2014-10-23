@@ -1,10 +1,23 @@
 h1 {
-    text-align: center
+    text-align: center;
 }
+
 h2##{aDomId} {
-    color: #990
+    color: #990;
 }
 
 #left-nav {
-    border-right: 1px solid #E8E8E8;
+    border-right: 2px solid #E8E8E8;
+}
+
+.left-align-pic {
+    align: left;
+    width: 48px; 
+    height: 48px;
+    hspace: 15px;
+}
+
+.bottom-align-text {
+    font-size: 16pt;
+    font-family: 宋体; 
 }

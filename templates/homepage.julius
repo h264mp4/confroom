@@ -1,7 +1,4 @@
-// Note, myTableDataReal myCalendarSelectDiv all can be replaced by newIndent.
-
-
-
+// Note, myTableDataReal myCalendarSelectDiv etc... all can be replaced by newIndent.
 
 $(document).ready(function() {
 
@@ -11,14 +8,9 @@ $(document).ready(function() {
     var queryDate = getDateStr(new Date()); 
     console.log(queryDate);
 
-    function showCurrentQueryDate(){
-        var showDate = "<div id='tmpShowDate'> <img src='/static/images/show-date.png' align='left' width='48' height='48' />" + "<span>&nbsp当前查询日期： " + queryDate + "</span></div>";
-        $("#myShowDate").prepend(showDate);
-    }
-
-    function deleteCurrentQueryDate() {
-        var elem = document.getElementById("tmpShowDate");
-        elem.parentNode.removeChild(elem);
+    function showCurrentQueryDate(qd){        
+        var showDate = "   " + qd + "  预订情况";
+        $("#myShowDate").text(showDate);
     }
 
     function getDateStr(dateObj) {
@@ -32,10 +24,11 @@ $(document).ready(function() {
 
     function setupDataTable(json, queryDay) {
         console.log("start setup dataTable.");
+        var jData = JSON.stringify({ "queryDay" : queryDay });
         var settings = {
             "bJQueryUI": true,
             "bProcessing": true,
-            //"bServerSide": true,
+            "bServerSide": true,
             "bRetrieve": true,
             "bSortable": false,
             "bDestroy": true,
@@ -50,9 +43,16 @@ $(document).ready(function() {
                 "sAlign": "left"
             },
 
-            "data": [queryDate],
+            "ajax": {
+                 url: "@{HomeR}",
+                 type: "POST",
+                 data: jData,
+                 contentType: "application/json; charset=utf-8",
+                 dataType: "json"
+            },
+
             "columns": [
-                { "title": "timeline" },
+                { "title": "时间" },
                 { "title": "07" },
                 { "title": "08" },
                 { "title": "09" },
@@ -82,7 +82,6 @@ $(document).ready(function() {
     function destroyDataTable() {
         dTable.fnDestroy();
         $("#myTableDataReal").empty(); // this line is crutial for recreate the table.
-        deleteCurrentQueryDate();        
     }
 
     /*kalendae doesn't depend on jquery, but still put it here. */     
@@ -106,8 +105,8 @@ $(document).ready(function() {
                 // 1. destroy the existing data table.
                 destroyDataTable();
 
-                // 2. make the $("#myTableDataDiv") a loading sign.
-                showCurrentQueryDate();
+                // 2. TODO: make the $("#myTableDataDiv") a loading sign.
+                showCurrentQueryDate(queryDate);
 
                 // 3. recreate the table
                 setupDataTable({}, queryDate);
@@ -119,5 +118,5 @@ $(document).ready(function() {
       
     // we setup the initial dataTable
     setupDataTable({}, queryDate);
-    showCurrentQueryDate();
+    showCurrentQueryDate(queryDate);
 });

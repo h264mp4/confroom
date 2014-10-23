@@ -1,4 +1,4 @@
-{-# LANGUAGE TupleSections, OverloadedStrings #-}
+{-# LANGUAGE TupleSections, OverloadedStrings, BangPatterns #-}
 module Handler.Home where
 
 import Import
@@ -6,6 +6,8 @@ import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
 import Data.Maybe(fromJust)
+import Data.Aeson(object, (.=))
+import Network.Wai
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -51,11 +53,16 @@ getHomeR = do
         aDomId <- newIdent
         $(widgetFile "homepage")
 
-postHomeR :: Handler Html
+postHomeR :: Handler Value
 postHomeR = do
-    defaultLayout $ do
-        aDomId <- newIdent
-        $(widgetFile "homepage")
+    req <- waiRequest
+    req' <- getRequest
+    liftIO $ print req
+    liftIO $ print "Get request body json"
+    !res <- runRequestBody
+    liftIO $ print $ fst res
+    liftIO $ print $ reqLangs req'
+    return $ object [ ("sEcho" :: Text) .= (1 :: Int) ]
 
 sampleForm :: Form (FileInfo, Text)
 sampleForm = renderDivs $ (,)
