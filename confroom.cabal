@@ -23,6 +23,7 @@ library
                      Handler.Home
                      Handler.Utils
                      Handler.MiscTypes
+                     Handler.DayBookingStatus
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -79,6 +80,8 @@ library
                  , wai                           >= 3.0.2
                  , resourcet                     >= 1.1.2.3
                  , conduit-extra                 >= 1.1.4
+                 , vector                        >= 0.10.0.1
+                 , unordered-containers          >=0.2.5.0
     -- see https://github.com/yesodweb/yesod/issues/814
     if !os(windows)
         build-depends: unix

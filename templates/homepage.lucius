@@ -18,6 +18,6 @@ h2##{aDomId} {
 }
 
 .bottom-align-text {
-    font-size: 16pt;
+    font-size: 14pt;
     font-family: 宋体; 
 }

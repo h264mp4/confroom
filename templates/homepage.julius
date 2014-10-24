@@ -1,4 +1,5 @@
 // Note, myTableDataReal myCalendarSelectDiv etc... all can be replaced by newIndent.
+// write ajax on my own
 
 $(document).ready(function() {
 
@@ -7,6 +8,9 @@ $(document).ready(function() {
     // year-month-day, on server side, we call fromGregorian y m d to recreate the Day.
     var queryDate = getDateStr(new Date()); 
     console.log(queryDate);
+
+    /* 2. we setup the booking data exchange ajax */
+
 
     function showCurrentQueryDate(qd){        
         var showDate = "   " + qd + "  预订情况";
@@ -22,65 +26,97 @@ $(document).ready(function() {
         return newDate; 
     };
 
-    function setupDataTable(json, queryDay) {
+    function setupDataTable(queryDay) {
         console.log("start setup dataTable.");
         var jData = JSON.stringify({ "queryDay" : queryDay });
-        var settings = {
-            "bJQueryUI": true,
-            "bProcessing": true,
-            "bServerSide": true,
-            "bRetrieve": true,
-            "bSortable": false,
-            "bDestroy": true,
-            "bPaginate": false,
-            "sDom": '<"top"T<"clear">rt<"clear">>',
-            "sPaginationType": "full_numbers",
-            "bScrollCollapse": true,
-            "bScrollAutoCss": false,
-            "oColVis": {
-                "buttonText": "&nbsp;",
-                "bRestore": true,
-                "sAlign": "left"
+
+        $("#myTableDataReal").bootstrapTable({
+            striped: true,
+            pagination: true,
+            showToggle: true,
+            showColumns: true,
+            cache: false,           
+
+            // below is the ajax query and response process.
+            url: "@{DayBookingStatusR}",
+            method: "GET",
+            contentType: "application/json",           
+            queryParams: function (params) {
+                console.log(params);
+                params["queryDay"] = queryDay;
+                console.log(params);
+                return params;
             },
 
-            "ajax": {
-                 url: "@{HomeR}",
-                 type: "POST",
-                 data: jData,
-                 contentType: "application/json; charset=utf-8",
-                 dataType: "json"
+            responseHandler: function(retData){
+                return retData.dataRows;
             },
 
-            "columns": [
-                { "title": "时间" },
-                { "title": "07" },
-                { "title": "08" },
-                { "title": "09" },
-                { "title": "10" },
-                { "title": "11" },
-                { "title": "12" },
-                { "title": "13" },
-                { "title": "14" },
-                { "title": "15" },
-                { "title": "16" },
-                { "title": "17" },
-                { "title": "18" },
-                { "title": "19" },
-                { "title": "20" },
-                { "title": "21" },
-                { "title": "22" },
-                { "title": "23" },
-                { "title": "00" }
-                // { "title": "Grade", "class": "center" }
-            ]
-        }
+            columns: [{
+                    width: 40,
+                    field: '房间/时间',
+                    title: '房间/时间'
+                }, {
+                    field: '08',
+                    title: '08'
+                }, {
+                    field: '09',
+                    title: '09'
+                }, {
+                    field: '10',
+                    title: '10'
+                }, {
+                    field: '11',
+                    title: '11'
+                }, {
+                    field: '12',
+                    title: '12'
+                }, {
+                    field: '13',
+                    title: '13'
+                }, {
+                    field: '14',
+                    title: '14'
+                }, {
+                    field: '15',
+                    title: '15'
+                }, {
+                    field: '16',
+                    title: '16'
+                }, {
+                    field: '17',
+                    title: '17'
+                }, {
+                    field: '18',
+                    title: '18'
+                }, {
+                    field: '19',
+                    title: '19'
+                }, {
+                    field: '20',
+                    title: '20'
+                }, {
+                    field: '21',
+                    title: '21'
+                }, {
+                    field: '22',
+                    title: '22'
+                }, {
+                    field: '23',
+                    title: '23'
+                }, {
+                    field: '00',
+                    title: '00'
+                }]            
+        });
 
-        dTable = $("#myTableDataReal").dataTable(settings);
+        // calculate the cells need merge.
+
         console.log("finish setup dataTable.");
     }
 
     function destroyDataTable() {
-        dTable.fnDestroy();
+        $("#myTableDataReal").bootstrapTable("destroy");
         $("#myTableDataReal").empty(); // this line is crutial for recreate the table.
     }
 
@@ -117,6 +153,6 @@ $(document).ready(function() {
     console.log("finish kalendae");
       
     // we setup the initial dataTable
-    setupDataTable({}, queryDate);
+    setupDataTable(queryDate);
     showCurrentQueryDate(queryDate);
 });
