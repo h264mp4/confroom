@@ -10,8 +10,6 @@ $(document).ready(function() {
     console.log(queryDate);
 
     /* 2. we setup the booking data exchange ajax */
-
-
     function showCurrentQueryDate(qd){        
         var showDate = "   " + qd + "  预订情况";
         $("#myShowDate").text(showDate);
@@ -30,6 +28,15 @@ $(document).ready(function() {
         console.log("start setup dataTable.");
         var jData = JSON.stringify({ "queryDay" : queryDay });
 
+        var titleColumns = [];
+        titleColumns.push({field: "房间 / 时间", title: "房间 / 时间"})
+        for (i = 8; i < 23; i++) {
+            titleColumns.push({
+                field: i,
+                title: i
+            });
+        }
+
         $("#myTableDataReal").bootstrapTable({
             striped: true,
             pagination: true,
@@ -37,12 +44,13 @@ $(document).ready(function() {
             showColumns: true,
             cache: false,           
 
+            pageList: [5,8,10],
+
             // below is the ajax query and response process.
             url: "@{DayBookingStatusR}",
             method: "GET",
             contentType: "application/json",           
             queryParams: function (params) {
-                console.log(params);
                 params["queryDay"] = queryDay;
                 console.log(params);
                 return params;
@@ -52,62 +60,17 @@ $(document).ready(function() {
                 return retData.dataRows;
             },
 
-            columns: [{
-                    width: 40,
-                    field: '房间/时间',
-                    title: '房间/时间'
-                }, {
-                    field: '08',
-                    title: '08'
-                }, {
-                    field: '09',
-                    title: '09'
-                }, {
-                    field: '10',
-                    title: '10'
-                }, {
-                    field: '11',
-                    title: '11'
-                }, {
-                    field: '12',
-                    title: '12'
-                }, {
-                    field: '13',
-                    title: '13'
-                }, {
-                    field: '14',
-                    title: '14'
-                }, {
-                    field: '15',
-                    title: '15'
-                }, {
-                    field: '16',
-                    title: '16'
-                }, {
-                    field: '17',
-                    title: '17'
-                }, {
-                    field: '18',
-                    title: '18'
-                }, {
-                    field: '19',
-                    title: '19'
-                }, {
-                    field: '20',
-                    title: '20'
-                }, {
-                    field: '21',
-                    title: '21'
-                }, {
-                    field: '22',
-                    title: '22'
-                }, {
-                    field: '23',
-                    title: '23'
-                }, {
-                    field: '00',
-                    title: '00'
-                }]            
+            rowStyle: function (row, index) {
+                var classes = ['success', 'info', 'active', 'warning', 'danger'];
+                if (index % 2 === 0 && index / 2 < classes.length) {
+                    return {
+                        classes: classes[index / 2]
+                    };
+                }
+                return {};
+            },
+
+            columns: titleColumns
         });
 
         // calculate the cells need merge.
@@ -123,12 +86,15 @@ $(document).ready(function() {
     /*kalendae doesn't depend on jquery, but still put it here. */     
     window.moment = Kalendae.moment;
     var utilDate = moment().add(2, 'months');
+    console.log("utildate:" + utilDate);
+
     $("#myCalendarSelectDiv").kalendae({
         userYearNav: false,
         direction: 'today-future', 
         months: 3,
         weekStart: 1,
         blackout: function (date) {
+            console.log("date vs utildate: " + date + " -vs- "+ utilDate);
             return date >= utilDate; // Blackout calendar days that are greater than utilDate
         },
 
@@ -141,11 +107,11 @@ $(document).ready(function() {
                 // 1. destroy the existing data table.
                 destroyDataTable();
 
-                // 2. TODO: make the $("#myTableDataDiv") a loading sign.
+                // 2. 
                 showCurrentQueryDate(queryDate);
 
                 // 3. recreate the table
-                setupDataTable({}, queryDate);
+                setupDataTable(queryDate);
             }
         }
     });

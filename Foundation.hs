@@ -19,7 +19,6 @@ import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
-import Handler.MiscTypes
 import Data.Time
 import System.Locale
 

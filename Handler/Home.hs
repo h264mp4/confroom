@@ -48,6 +48,7 @@ getHomeR = do
 
     --theId <- testBookingRoom curDay curTime t1
     --runDB $ cancelABooking theId
+    liftIO $ print ("today in Day format: " ++ (show curDay))
 
     defaultLayout $ do
         aDomId <- newIdent

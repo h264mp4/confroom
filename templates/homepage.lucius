@@ -21,3 +21,7 @@ h2##{aDomId} {
     font-size: 14pt;
     font-family: 宋体; 
 }
+
+.fixed-width {
+    width: 100%;
+}

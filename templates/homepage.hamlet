@@ -39,6 +39,7 @@
                 <button class="btn btn-primary" type="button" id="new-booking">新的预订
         <div class="row">
             <div class="col-md-12">
+                  <div style="display:none">#{show curDay}
                   <div id="myCalendarSelectDiv">
         <div class="row">
             <hr>
@@ -48,4 +49,5 @@
             <div class="col-md-12" > 
                 <br>
             <div class="col-md-12" id="myTableDataDiv">
-                <table id="myTableDataReal">
+                <table id="myTableDataReal" width="100%">
+

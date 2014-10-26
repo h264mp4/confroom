@@ -9,19 +9,23 @@ import qualified Data.HashMap.Strict as HM
 import Data.Maybe(fromJust)
 import Data.Aeson(toJSON, object, (.=))
 
--- 17 ge 
+-- 15 ge 
 fields :: [Text]
-fields = ["房间/时间","08","09","10","11","12","13","14","15","16",
-                     "17","18","19","20","21","22","23","00"]
+fields = ["房间 / 时间","8","9","10","11","12","13","14","15","16",
+                     "17","18","19","20","21","22"]
 contents :: [[Text]]
-contents = [ ["1001", "peng", "xing", "tao", "peng", "xing", "tao", "peng", "xing", "tao", 
-                      "peng", "xing", "tao", "peng", "xing", "tao", "peng", "xing"      ],
-             ["1002", "p2", "x2", "t2", "p2", "x2", "t2", "p2", "x2", "t2", 
-                      "p2", "x2", "t2", "p2", "x2", "t2", "p2", "x2"      ],
-             ["1003", "p3", "x3", "t3", "p3", "x3", "t3", "p3", "x3", "t3", 
-                      "p3", "x3", "t3", "p3", "x3", "t3", "p3", "x3"      ],
-             ["1004", "p4", "x4", "t4", "p4", "x4", "t4", "p4", "x4", "t4", 
-                      "p4", "x4", "t4", "p4", "x4", "t4", "p4", "x4"      ]
+contents = [ ["1001", "彭兴涛,研讨会", "吴桃李，组会ing", "tao", "peng", "吴桃李，组会ing", "tao", 
+                      "peng", "吴桃李，组会ing", "tao", "peng", "吴桃李，组会ing", 
+                       "tao", "peng", "吴桃李，组会ing", "tao"],
+             ["1002", "无", "吴桃李，组会2", "彭兴涛,研讨会", "无", 
+                      "吴桃李，组会2", "t2", "无", "吴桃李，组会2", "t2", 
+                      "无", "吴桃李，组会2", "t2", "无", "吴桃李，组会2", "t2"],
+             ["1003", "p3", "吴桃李，组会3", "t3", "彭兴涛,研讨会", "吴桃李，组会3", 
+                       "t3", "p3", "吴桃李，组会3", "t3", 
+                      "p3", "吴桃李，组会3", "t3", "p3", "吴桃李，组会3", "t3"],
+             ["1004", "p4", "吴桃李，组会4", "t4", "p4", "吴桃李，组会4", "t4", "p4", 
+                      "吴桃李，组会4", "t4", 
+                      "p4", "吴桃李，组会4", "t4", "p4", "吴桃李，组会4", "彭兴涛,研讨会"]
            ]
               
 
@@ -38,7 +42,6 @@ getDayBookingStatusR = do
     req' <- getRequest
     liftIO $ print req
     liftIO $ print $ reqLangs req'
-    liftIO $ print fakeJsonRet    
     valueMB <- lookupGetParam "queryDay"
     case valueMB of
         Nothing -> liftIO $ print "not passed"
