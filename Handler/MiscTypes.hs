@@ -4,7 +4,7 @@ import Prelude
 import Database.Persist.TH
 import Data.Time
 
-data Level = AuthNormal | AuthAdmin | AuthRoot
+data Level = AuthNormal | AuthAdvance |AuthAdmin 
     deriving (Show, Read, Eq, Ord)
 derivePersistField "Level"
 

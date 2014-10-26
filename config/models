@@ -11,10 +11,10 @@ User
 
 Room
     number  Text
-    available Bool
-    firstAdd UTCTime
-    validTime UTCTime
     level Level
+    available Bool
+    validTime UTCTime
+    firstAdd UTCTime
     UniqueRoomNo number
     deriving Show
 
