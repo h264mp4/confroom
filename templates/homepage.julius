@@ -31,7 +31,7 @@ $(document).ready(function() {
         for (i = 8; i < 23; i++) {
             titleColumns.push({
                 field: i,
-                title: i
+                title: "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp " + i.toString() + "点"
             });
         }
 
@@ -62,7 +62,7 @@ $(document).ready(function() {
                 var classes = ['success', 'info', 'active', 'warning', 'danger'];
                 if (index % 2 === 0 && index / 2 < classes.length) {
                     return {
-                        classes: classes[index / 2]
+                        classes: classes[index / 2],
                     };
                 }
                 return {};
@@ -119,4 +119,7 @@ $(document).ready(function() {
     // we setup the initial dataTable
     setupDataTable(queryDate);
     showCurrentQueryDate(queryDate);
+
+
+    // other callbacks
 });

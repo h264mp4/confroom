@@ -14,7 +14,7 @@ fields :: [Text]
 fields = ["房间 / 时间","8","9","10","11","12","13","14","15","16",
                      "17","18","19","20","21","22"]
 contents :: [[Text]]
-contents = [ ["1001", "彭兴涛,研讨会", "吴桃李，组会ing", "tao", "peng", "吴桃李，组会ing", "tao", 
+contents = [ ["1001", "彭兴涛<br />研讨会", "吴桃李<br />组会ing", "tao", "peng", "吴桃李，组会ing", "tao", 
                       "peng", "吴桃李，组会ing", "tao", "peng", "吴桃李，组会ing", 
                        "tao", "peng", "吴桃李，组会ing", "tao"],
              ["1002", "无", "吴桃李，组会2", "彭兴涛,研讨会", "无", 
@@ -38,10 +38,10 @@ fakeJsonRet = object $ [fakeDataName .= fakeDataRows, "total" .= toJSON (4::Int)
 
 getDayBookingStatusR :: Handler Value -- actually return a json.
 getDayBookingStatusR = do
-    req <- waiRequest
-    req' <- getRequest
-    liftIO $ print req
-    liftIO $ print $ reqLangs req'
+    --req <- waiRequest
+    --req' <- getRequest
+    --liftIO $ print req
+    --liftIO $ print $ reqLangs req'
     valueMB <- lookupGetParam "queryDay"
     case valueMB of
         Nothing -> liftIO $ print "not passed"

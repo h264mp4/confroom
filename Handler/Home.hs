@@ -33,7 +33,6 @@ testBookingRoom aDay curTime t1 = do
     mayRoomId <- runDB $ addNewRoom (testRoom aDay t1)
     runDB $ bookingRoom (fromJust mayUserId) (fromJust mayRoomId) aDay (Timespan curTime curTime)
     
-
 getHomeR :: Handler Html
 getHomeR = do
     (formWidget, formEnctype) <- generateFormPost sampleForm
@@ -58,18 +57,14 @@ postHomeR :: Handler Value
 postHomeR = do
     req <- waiRequest
     req' <- getRequest
-    liftIO $ print req
-    liftIO $ print "Get request body json"
-    !res <- runRequestBody
-    liftIO $ print $ fst res
-    liftIO $ print $ reqLangs req'
+    --liftIO $ print req
+    --liftIO $ print "Get request body json"
+    -- !res <- runRequestBody
+    --liftIO $ print $ fst res
+    --liftIO $ print $ reqLangs req'
     return $ object [ ("sEcho" :: Text) .= (1 :: Int) ]
 
 sampleForm :: Form (FileInfo, Text)
 sampleForm = renderDivs $ (,)
     <$> fileAFormReq "Choose a file"
     <*> areq textField "What's on the file?" Nothing
-
-
---    <link rel="stylesheet" href="build/kalendae.css" type="text/css" charset="utf-8">
---    <script src="build/kalendae.standalone.js" type="text/javascript" charset="utf-8"></script>

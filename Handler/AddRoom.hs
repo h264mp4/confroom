@@ -24,25 +24,41 @@ postAddRoomR :: Handler Html
 postAddRoomR = do
     ((result, formWidget), formEnctype) <- runFormPost addRoomForm
     let handlerName = "postAddRoomR" :: Text
-        maybeFormInfo = case result of
-            FormSuccess res -> Just res
-            _ -> Nothing
+    case result of
+        FormFailure errMsg -> do
+            liftIO $ print "Get Form Data Faile"
+            defaultLayout $ do
+                backWidget
+        --        toWidget [hamlet|
+        --                    <div class="row">
+        --                        <div class="col-md-12">
+        --                            <h3> 无效的会议室信息: @{errMsg}, 请重新输入.
+        --                 |]
 
-    mayRoomId <- runDB $ addNewRoom (fromJust maybeFormInfo)
-    liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
-    liftIO $ print maybeFormInfo
-    defaultLayout $ do
-        toWidget 
-          [hamlet|
-            <div class="row">
-                <div class="col-md-12">
-                    <h3> 会议室信息已保存
-                <div class="col-md-12"> 
-                    $maybe formInfo  <- maybeFormInfo
-                        <p> #{show formInfo} 
-                    $nothing
-                        <p> 无效的会议室信息，请从新输入
-          |]
+        FormSuccess formInfo -> do
+            mayRoomId <- runDB $ addNewRoom formInfo
+            case mayRoomId of
+                 Nothing -> defaultLayout $ do
+                     backWidget         
+                     toWidget [hamlet| <h3> 会议室信息已存在，请重新输入.|]
+
+                 Just roomId -> do
+                     liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
+                     liftIO $ print formInfo
+                     defaultLayout $ do
+                         toWidget [hamlet|
+                             <div class="row">
+                                 <div class="col-md-12">
+                                     <h3> 会议室信息已保存
+                                 <div class="col-md-12"> 
+                                     <p> #{show formInfo} 
+                           |]
+    where
+    backWidget = toWidget [hamlet|
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type=button value="返回" class="btn btn-primary" onClick="location.href='@{AddRoomR}'">
+|]
 
 simpleFormLayoutForAddRoom = BootstrapHorizontalForm
                              {
@@ -56,7 +72,7 @@ addRoomForm :: Form Room
 addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
         <$> areq textField "会议室编号" Nothing
         <*> areq (selectFieldList authLevel) "预订权限" Nothing
-        <*> areq boolField "是否现在启用" Nothing
+        <*> areq boolField "是否现在启用" (Just True)
         <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
                                  "会议室有效期至" Nothing
         <*> lift (liftIO getCurrentTime)
