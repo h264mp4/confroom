@@ -6,3 +6,4 @@
 
 / HomeR GET POST
 /daybookingstatus DayBookingStatusR GET
+/addroom AddRoomR GET POST

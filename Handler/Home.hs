@@ -26,11 +26,11 @@ import Network.Wai
 
 
 testUser = User "peng_pxt@163.com" "hah" "peng" AuthNormal False "waht" "wahtandwhat"
-testRoom t1 t2 = Room "1001" True t1 t2 AuthNormal
+testRoom t1 t2 = Room "1001" AuthNormal True t1 t2 
 
 testBookingRoom aDay curTime t1 = do
     mayUserId <- runDB $ addNewUser testUser
-    mayRoomId <- runDB $ addNewRoom (testRoom t1 t1)
+    mayRoomId <- runDB $ addNewRoom (testRoom aDay t1)
     runDB $ bookingRoom (fromJust mayUserId) (fromJust mayRoomId) aDay (Timespan curTime curTime)
     
 

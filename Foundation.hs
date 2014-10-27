@@ -6,6 +6,7 @@ import Yesod.Static
 import Yesod.Auth
 import Yesod.Auth.Account
 import Yesod.Auth.BrowserId
+import Yesod.Form.Jquery(YesodJquery (..), jqueryDayField)
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Client.Conduit (Manager, HasHttpManager (getHttpManager))
@@ -22,7 +23,6 @@ import Yesod.Core.Types (Logger)
 import Data.Time
 import System.Locale
 import Handler.MiscTypes
-
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -159,6 +159,12 @@ instance YesodAuth App where
 -- achieve customized and internationalized form validation messages.
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
+
+instance YesodJquery App where
+    urlJqueryJs _ = Left $ StaticR js_jquery_1_11_1_min_js
+    urlJqueryUiJs _ = Left $ StaticR js_jquery_ui_1_11_2_js
+    urlJqueryUiCss _ = Left $ StaticR css_jquery_ui_1_11_2_min_css
+    urlJqueryUiDateTimePicker _ = Right "http://github.com/gregwebs/jquery.ui.datetimepicker/raw/master/jquery.ui.datetimepicker.js"
 
 -- | Get the 'Extra' value, used to hold data from the settings.yml file.
 getExtra :: Handler Extra

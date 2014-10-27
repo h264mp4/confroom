@@ -11,15 +11,13 @@ $(document).ready(function() {
 
     /* 2. we setup the booking data exchange ajax */
     function showCurrentQueryDate(qd){        
-        var showDate = "   " + qd + "  预订情况";
-        $("#myShowDate").text(showDate);
+        $("#myShowDate").text("  " + qd + "  预订情况");
     }
 
     function getDateStr(dateObj) {
         var year = dateObj.getUTCFullYear();
         var month = dateObj.getUTCMonth() + 1; //months from 1-12
         var day = dateObj.getUTCDate();
-         
         var newDate = year + "-" + month + "-" + day;
         return newDate; 
     };

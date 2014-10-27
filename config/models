@@ -13,7 +13,7 @@ Room
     number  Text
     level Level
     available Bool
-    validTime UTCTime
+    validTime Day
     firstAdd UTCTime
     UniqueRoomNo number
     deriving Show

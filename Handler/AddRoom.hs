@@ -7,69 +7,60 @@ import Handler.MiscTypes
 import Handler.Utils
 import Data.Maybe(fromJust)
 import Data.Aeson(object, (.=))
+import Yesod.Form.Jquery
+import Yesod.Form.Bootstrap3 
 
 getAddRoomR :: Handler Html
 getAddRoomR = do
-    (formWidget, formEnctype) <- generateFormPost sampleForm
+    (addRoomWidget, formEnctype) <- generateFormPost addRoomForm
     let submission = Nothing :: Maybe (FileInfo, Text)
         handlerName = "getAddRoomR" :: Text
 
     defaultLayout $ do
-        aDomId <- newIdent
+        addRoomFormId <- newIdent
         $(widgetFile "addroom")
 
-postAddRoomR :: Handler Value
+postAddRoomR :: Handler Html
 postAddRoomR = do
-    (formWidget, formEnctype) <- generateFormPost sampleForm
-    let submission = Nothing :: Maybe (FileInfo, Text)
-        handlerName = "postAddRoomR" :: Text
+    ((result, formWidget), formEnctype) <- runFormPost addRoomForm
+    let handlerName = "postAddRoomR" :: Text
+        maybeFormInfo = case result of
+            FormSuccess res -> Just res
+            _ -> Nothing
 
-    req <- waiRequest
-    req' <- getRequest
-    liftIO $ print req
-    liftIO $ print "Get request body json"
-    !res <- runRequestBody
-    liftIO $ print $ fst res
-    liftIO $ print $ reqLangs req'
-    return $ object [ ("sEcho" :: Text) .= (1 :: Int) ]
+    mayRoomId <- runDB $ addNewRoom (fromJust maybeFormInfo)
+    liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
+    liftIO $ print maybeFormInfo
+    defaultLayout $ do
+        toWidget 
+          [hamlet|
+            <div class="row">
+                <div class="col-md-12">
+                    <h3> 会议室信息已保存
+                <div class="col-md-12"> 
+                    $maybe formInfo  <- maybeFormInfo
+                        <p> #{show formInfo} 
+                    $nothing
+                        <p> 无效的会议室信息，请从新输入
+          |]
 
-sampleForm :: Form Room
-sampleForm = renderDivs $ Room
-    <$> areq textField "会议室编号" Nothing
-    <*> areq (selectFieldList authLevel) "预订权限" Nothing
-    <*> areq 
+simpleFormLayoutForAddRoom = BootstrapHorizontalForm
+                             {
+                                  bflLabelOffset = ColMd 0
+                                 ,bflLabelSize   = ColMd 4
+                                 ,bflInputOffset = ColMd 0
+                                 ,bflInputSize   = ColMd 4
+                             }
+
+addRoomForm :: Form Room
+addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
+        <$> areq textField "会议室编号" Nothing
+        <*> areq (selectFieldList authLevel) "预订权限" Nothing
+        <*> areq boolField "是否现在启用" Nothing
+        <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
+                                 "会议室有效期至" Nothing
+        <*> lift (liftIO getCurrentTime)
 
     where
     authLevel :: [(Text, Level)]
     authLevel = [("普通", AuthNormal), ("领导", AuthAdvance),("管理员", AuthAdmin)]
-
-    lift (liftIO getCurrentTime)
-
-Room
-    number  Text
-    available Bool
-    firstAdd UTCTime
-    validTime UTCTime
-    level Level
-    UniqueRoomNo number
-    deriving Show
-
-
-data Car = Car
-    { carModel :: Text
-    , carYear :: Int
-    , carColor :: Maybe Color
-    }
-  deriving Show
-
-data Color = Red | Blue | Gray | Black
-    deriving (Show, Eq, Enum, Bounded)
-
-carAForm :: Maybe Car -> AForm Handler Car
-carAForm mcar = Car
-    <$> areq textField "Model" (carModel <$> mcar)
-    <*> areq carYearField "Year" (carYear <$> mcar)
-    <*> aopt (selectFieldList colors) "Color" (carColor <$> mcar)
-  where
-    colors :: [(Text, Color)]
-    colors = [("Red", Red), ("Blue", Blue), ("Gray", Gray), ("Black", Black)]
