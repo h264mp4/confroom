@@ -1,13 +1,7 @@
-color:#E8A02B'> <b><i>" + qd + "</i></b> </span>]");
-    }
-
-    function getDateStr(dateObj) {
-        var year = dateObj.getUTCFullYear();
-        var month = dateObj.getUTCMonth() + 1; //months from 1-12
-        var day = dateObj.getUTCDate();
-        var newDate = year + "-" + month + "-" + day;
-        return newDate; 
-    };
+$(document).ready(function() {
+    // 1. some constant and helper functions
+    var loadData = @{loadType};
+    
 
     function setupDataTable(queryDay) {
         console.log("start setup dataTable.");
@@ -107,7 +101,6 @@ color:#E8A02B'> <b><i>" + qd + "</i></b> </span>]");
     // we setup the initial dataTable
     setupDataTable(queryDate);
     showCurrentQueryDate(queryDate);
-
 
     // other callbacks
 });

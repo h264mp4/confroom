@@ -26,3 +26,6 @@ infixl 0 ?
 boolToHanzi :: forall a. IsString a => Bool -> a
 boolToHanzi b | b == True = "是"
               | otherwise = "否"
+
+emptyString :: String
+emptyString = []

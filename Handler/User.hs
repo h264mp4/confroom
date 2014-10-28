@@ -2,6 +2,7 @@
 module Handler.User where
 
 import Import
+import CommonWidget
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
@@ -25,28 +26,20 @@ postAddUserR = do
     ((result, formWidget), formEnctype) <- runFormPost addUserForm
     let handlerName = "postAddUserR" :: Text
     case result of
-        FormFailure errMsg -> defaultLayout $ backWidget ("无效的会议室信息, 请重新输入." :: String)
+        FormFailure errMsg -> defaultLayout $ do
+                 backNavWidget emptyString ("无效的用户信息, 请重新输入." :: String) ListUserR
 
         FormSuccess formInfo -> do
             mayUserId <- runDB $ addNewUser formInfo
             case mayUserId of
-                 Nothing -> defaultLayout $ backWidget  ("会议室信息已存在，请重新输入" :: String)
+                 Nothing -> defaultLayout $ do
+                      backNavWidget emptyString ("用户信息已存在，请重新输入" :: String) ListUserR
 
                  Just userId -> do
                      liftIO $ print ("Add new user done: " ++ show (fromJust mayUserId))
                      liftIO $ print formInfo
-                     defaultLayout $ backWidget (toHtmlUserInfo formInfo)
-
-    where
-    backWidget info = toWidget [hamlet|
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <input type=button value="返回" class="btn btn-primary" onClick="location.href='@{AddUserR}'">
-                                <div class="col-md-12">
-                                     <h3> 会议室信息已保存
-                                <div class="col-md-12"> 
-                                    <p> #{preEscapedToMarkup info}                     
-|]
+                     defaultLayout $ do
+                         backNavWidget ("用户信息已保存"::String) (toHtmlUserInfo formInfo) ListUserR
 
 simpleFormLayoutForAddUser = BootstrapHorizontalForm
                              {
@@ -81,5 +74,5 @@ getListUserR = do
 toHtmlUserInfo :: User -> String
 toHtmlUserInfo userInfo = ( 
     "姓名: " ++ (show $ userName userInfo) ++ "<br />  " ++
-    "权限: " ++ (show $ userLevel userInfo) ++ "<br />  " ++
+    "权限: " ++ (toLevelString $ userLevel userInfo) ++ "<br />  " ++
     "电子邮箱: " ++ (show $ userEmail userInfo) ++ "<br />  ")

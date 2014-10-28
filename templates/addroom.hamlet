@@ -4,6 +4,6 @@
     <div class="col-md-8">
         <h3>添加新的会议室
     <div class="col-md-8" id=#{addRoomFormId}>
-        <form class="form-horizontal control-label" method=post action=@{AddRoomR}#form enctype=#{formEnctype}>
+        <form class="form-horizontal control-label" method=post action=@{AddRoomR} enctype=#{formEnctype}>
             ^{addRoomWidget}
             <input class="btn btn-primary" type="submit" value="保存">

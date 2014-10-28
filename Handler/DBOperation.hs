@@ -50,8 +50,7 @@ editUserProfile theUserId newInfo = do
     return ()
 
 listUserProfile = do
-    liftIO $ print "will get all users info"
-    users <- selectList [] [Asc UserId]
+    users <- selectList [] [Asc UserEmail]
     liftIO $ print users
     return (users :: [Entity User])   
 

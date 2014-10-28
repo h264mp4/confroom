@@ -1,6 +1,3 @@
-// Note, myTableDataReal myCalendarSelectDiv etc... all can be replaced by newIndent.
-// write ajax on my own
-
 $(document).ready(function() {
 
     /* 1. first we define some global data and functions. */

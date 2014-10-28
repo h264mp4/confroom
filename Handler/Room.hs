@@ -2,6 +2,7 @@
 module Handler.Room where
 
 import Import
+import CommonWidget
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
@@ -23,6 +24,8 @@ getAddRoomR = do
         addRoomFormId <- newIdent
         $(widgetFile "addroom")
 
+
+
 postAddRoomR :: Handler Html
 postAddRoomR = do
     ((result, formWidget), formEnctype) <- runFormPost addRoomForm
@@ -31,32 +34,17 @@ postAddRoomR = do
         FormSuccess formInfo -> do
             mayRoomId <- runDB $ addNewRoom formInfo
             case mayRoomId of
-                 Nothing -> defaultLayout $ backWidget  ("会议室信息已存在，请重新输入" :: String)
-
+                 Nothing -> defaultLayout $ do
+                     backNavWidget emptyString ("会议室信息已存在，请重新输入" :: String) ListRoomR
                  Just roomId -> do
                      liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
                      liftIO $ print formInfo
-                     defaultLayout $ backWidget (toHtmlRoomInfo formInfo)
-        _ -> defaultLayout $ backWidget ("无效的会议室信息, 请重新输入." :: String)
+                     defaultLayout $ do
+                         backNavWidget ("会议室信息已保存" :: String) 
+                                       (toHtmlRoomInfo formInfo) ListRoomR
+        _ -> defaultLayout $ do
+                 backNavWidget emptyString ("无效的会议室信息, 请重新输入." :: String) ListRoomR
 
-    where
-    backWidget info = toWidget [hamlet|
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <input type=button value="返回" class="btn btn-primary" onClick="location.href='@{AddRoomR}'">
-                                <div class="col-md-12">
-                                     <h3> 会议室信息已保存
-                                <div class="col-md-12"> 
-                                    <p> #{preEscapedToMarkup info}                     
-|]
-
-simpleFormLayoutForAddRoom = BootstrapHorizontalForm
-                             {
-                                  bflLabelOffset = ColMd 0
-                                 ,bflLabelSize   = ColMd 4
-                                 ,bflInputOffset = ColMd 0
-                                 ,bflInputSize   = ColMd 4
-                             }
 
 addRoomForm :: Form Room
 addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
@@ -69,8 +57,7 @@ addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
 
 ------------------------------------------------------------------------------------------
 ---- list room
--- fakeJsonRet = object $ [fakeDataName .= fakeDataRows, "total" .= toJSON (4::Int)]
---    return $ fakeJsonRet
+
 getListRoomR :: Handler Value
 getListRoomR = do
     -- TODO: User Auth Widget
@@ -95,3 +82,12 @@ toHtmlRoomInfo roomInfo = (
     "即时启用: " ++ (boolToHanzi $ roomAvailable roomInfo) ++ "<br />  " ++
     "会议室有效期至: " ++ (show $ roomValidTime roomInfo) ++ "<br />  " ++
     "会议室添加日期: " ++ (show $ convertUtcToZoneTime $ roomFirstAdd roomInfo) ++ "<br />")
+
+simpleFormLayoutForAddRoom = BootstrapHorizontalForm
+                             {
+                                  bflLabelOffset = ColMd 0
+                                 ,bflLabelSize   = ColMd 4
+                                 ,bflInputOffset = ColMd 0
+                                 ,bflInputSize   = ColMd 4
+                             }
+

@@ -16,7 +16,7 @@ library
                      Foundation
                      Import
                      Model
-                     Settings
+                     Settings                    
                      Settings.StaticFiles
                      Settings.Development
                      Handler.DBOperation
@@ -27,6 +27,7 @@ library
                      Handler.Room
                      Handler.User
                      Handler.Manage
+                     CommonWidget
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
