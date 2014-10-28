@@ -76,6 +76,12 @@ editRoomProfile theRoomId newInfo = do
                      ]
     return "OK"
 
+listRoomProfile = do
+    liftIO $ print "will get all rooms info"
+    rooms <- selectList [] [Asc RoomId]
+    liftIO $ print rooms
+    return (rooms :: [Entity Room])
+
 deleteRoom theRoomId = do
     delete theRoomId
     return ()

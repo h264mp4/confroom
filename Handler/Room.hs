@@ -10,6 +10,9 @@ import Data.Aeson(object, (.=))
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
 
+------------------------------------------------------------------------------------------
+---- AddRoom
+
 getAddRoomR :: Handler Html
 getAddRoomR = do
     (addRoomWidget, formEnctype) <- generateFormPost addRoomForm
@@ -66,12 +69,30 @@ addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
         <*> lift (liftIO $ getCurrentTime)
 
 ------------------------------------------------------------------------------------------
+---- list room
+-- fakeJsonRet = object $ [fakeDataName .= fakeDataRows, "total" .= toJSON (4::Int)]
+--    return $ fakeJsonRet
+getListRoomR :: Handler Value
+getListRoomR = do
+    ----TODO: User Auth Widget
+    rooms <- runDB $ listRoomProfile
+    if null rooms
+       then return $ object $ []
+       else do
+            return $ object $ []            
+   
+-- editRoomR theId = do
+    
+
+
+
+------------------------------------------------------------------------------------------
 ---- other helpers
 
 toHtmlRoomInfo :: Room -> String
 toHtmlRoomInfo roomInfo = (
     "会议室编号: " ++ (show $ roomNumber roomInfo) ++ "<br />  " ++
-    "预订权限: " ++ (show $ roomLevel roomInfo) ++ "<br />  " ++
+    "预订权限: " ++ (toLevelString $ roomLevel roomInfo) ++ "<br />  " ++
     "即时启用: " ++ (show $ roomAvailable roomInfo) ++ "<br />  " ++
     "会议室有效期至: " ++ (show $ roomValidTime roomInfo) ++ "<br />  " ++
-    "会议室添加日期: " ++ (show $ roomFirstAdd roomInfo) ++ "<br />")
+    "会议室添加日期: " ++ (show $ convertUtcToZoneTime $ roomFirstAdd roomInfo) ++ "<br />")

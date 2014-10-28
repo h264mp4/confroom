@@ -2,6 +2,9 @@ module Handler.Utils where
 
 import Import
 import Handler.MiscTypes
+import System.IO.Unsafe(unsafePerformIO)
+
+myTimeZone = unsafePerformIO $ getCurrentTimeZone
 
 getCurDayAndTime :: IO LocalTime
 getCurDayAndTime = do
@@ -9,9 +12,7 @@ getCurDayAndTime = do
     utcT  <- getCurrentTime
     return $ utcToLocalTime timeZ utcT
 
-convertUtcToZoneTime utcT = do
-    timeZ <- getCurrentTimeZone
-    return $ utcToZonedTime timeZ utcT
+convertUtcToZoneTime = utcToZonedTime myTimeZone
 
 (?) :: Bool -> (a, a) -> a
 True  ? (x, _) = x

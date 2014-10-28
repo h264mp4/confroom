@@ -7,12 +7,12 @@
 / HomeR GET POST
 /daybookingstatus DayBookingStatusR GET
 -- /dobooking DoBookingR GET POST
---  
+
 /addroom AddRoomR GET POST
 -- /editroom EditRoomR GET POST
 -- /deleteroom DeleteRoomR DELETE
--- /listroom ListRoomR GET
---  
+/listroom ListRoomR GET
+
 /adduser AddUserR GET POST
 -- /edituser EditUserR GET POST
 -- /deleteuser DeleteUserR DELETE
