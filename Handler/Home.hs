@@ -42,8 +42,9 @@ getHomeR = do
     -- curDay will be passed to Juliu, to limit the day selection range to 2 month.
     curDT <- liftIO getCurDayAndTime
     let curDay = localDay curDT
+        curTime = localTimeOfDay curDT
         curDayStr = show curDay
-    liftIO $ print ("today in Day format: " ++ curDayStr)
+    liftIO $ print ("today in Day format: " ++ curDayStr ++ ". Time: " ++ (show curTime))
 
     defaultLayout $ do
         aDomId <- newIdent

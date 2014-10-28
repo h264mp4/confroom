@@ -11,7 +11,7 @@ $(document).ready(function() {
 
     /* 2. we setup the booking data exchange ajax */
     function showCurrentQueryDate(qd){        
-        $("#myShowDate").text( "  预订情况:  " + qd);
+        $("#myShowDate").html("预订情况: [<span style='color:#E8A02B'> <b><i>" + qd + "</i></b> </span>]");
     }
 
     function getDateStr(dateObj) {
@@ -93,7 +93,7 @@ $(document).ready(function() {
         months: 3,
         weekStart: 1,
         blackout: function (date) {
-            console.log("date vs utildate: " + date + " -vs- "+ utilDate);
+            //console.log("date vs utildate: " + date + " -vs- "+ utilDate);
             return date >= utilDate; // Blackout calendar days that are greater than utilDate
         },
 

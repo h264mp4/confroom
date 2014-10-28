@@ -22,6 +22,10 @@ h2##{aDomId} {
     font-family: 宋体; 
 }
 
+.bottom-align-text > span {
+    font-size: 16pt;
+}
+
 .fixed-width {
     width: 100%;
 }
