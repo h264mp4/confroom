@@ -6,7 +6,7 @@ import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
 import Data.Maybe(fromJust)
-import Data.Aeson(object, (.=))
+import Data.Aeson(ToJSON(..), object, (.=))
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
 
@@ -74,16 +74,16 @@ addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
 --    return $ fakeJsonRet
 getListRoomR :: Handler Value
 getListRoomR = do
-    ----TODO: User Auth Widget
+    -- TODO: User Auth Widget
     rooms <- runDB $ listRoomProfile
     if null rooms
        then return $ object $ []
        else do
-            return $ object $ []            
+            return $ object $ ["dataRows" .= (map toJSON rooms), 
+                               "total" .= toJSON (length rooms :: Int)
+                              ]
    
 -- editRoomR theId = do
-    
-
 
 
 ------------------------------------------------------------------------------------------
@@ -93,6 +93,6 @@ toHtmlRoomInfo :: Room -> String
 toHtmlRoomInfo roomInfo = (
     "会议室编号: " ++ (show $ roomNumber roomInfo) ++ "<br />  " ++
     "预订权限: " ++ (toLevelString $ roomLevel roomInfo) ++ "<br />  " ++
-    "即时启用: " ++ (show $ roomAvailable roomInfo) ++ "<br />  " ++
+    "即时启用: " ++ (boolToHanzi $ roomAvailable roomInfo) ++ "<br />  " ++
     "会议室有效期至: " ++ (show $ roomValidTime roomInfo) ++ "<br />  " ++
     "会议室添加日期: " ++ (show $ convertUtcToZoneTime $ roomFirstAdd roomInfo) ++ "<br />")
