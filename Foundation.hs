@@ -23,6 +23,7 @@ import Yesod.Core.Types (Logger)
 import Data.Time
 import System.Locale
 import Handler.MiscTypes
+
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -150,7 +151,7 @@ instance YesodAuth App where
     getAuthId = return . Just . credsIdent
     loginDest _ = HomeR
     logoutDest _ = HomeR
-    authPlugins _ = [accountPlugin]
+    authPlugins _ = [] --accountPlugin
     authHttpManager _ = error "No manager needed"
     onLogin = return ()
     maybeAuthId = lookupSession credsKey
@@ -177,7 +178,7 @@ getExtra = fmap (appExtra . settings) getYesod
 --
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
 
-
+{-
 -- Account Plug In Instance
 instance AccountSendEmail App
 
@@ -186,11 +187,12 @@ instance YesodAuthAccount (AccountPersistDB App User) App where
 
 instance PersistUserCredentials User where
     userUsernameF = UserName
-    userPasswordHashF = UserPassword
     userEmailF = UserEmail
-    userEmailVerifiedF = UserVerified
-    userEmailVerifyKeyF = UserVerifyKey
+    userPasswordHashF = UserPassword
+    userLevelF = UserLevel
     userResetPwdKeyF = UserResetPasswordKey
-    uniqueUsername = UniqueEmail
+    userFirstAddF = UserFirstAdd
+    uniqueEmail = UniqueEmail
 
-    userCreate name email key pwd = User email pwd name AuthNormal False key ""
+    userCreate name email pwd lev pwd utcT = User email pwd name AuthNormal key utcT
+-}

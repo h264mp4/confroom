@@ -24,7 +24,8 @@ library
                      Handler.Utils
                      Handler.MiscTypes
                      Handler.DayBookingStatus
-                     Handler.AddRoom
+                     Handler.Room
+                     Handler.User
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

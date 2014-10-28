@@ -2,7 +2,9 @@ module Model where
 
 import Yesod
 import Data.Text (Text)
+import Database.Persist
 import Database.Persist.Quasi
+import Database.Persist.Sql
 import Data.ByteString (ByteString)
 import Data.Time
 import Handler.MiscTypes

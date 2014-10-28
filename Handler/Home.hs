@@ -25,11 +25,11 @@ import Network.Wai
 -}
 
 
-testUser = User "peng_pxt@163.com" "hah" "peng" AuthNormal False "waht" "wahtandwhat"
+testUser t1 = User "peng_pxt@163.com" "hah" "peng" AuthNormal "wahtandwhat" t1
 testRoom t1 t2 = Room "1001" AuthNormal True t1 t2 
 
 testBookingRoom aDay curTime t1 = do
-    mayUserId <- runDB $ addNewUser testUser
+    mayUserId <- runDB $ addNewUser (testUser t1)
     mayRoomId <- runDB $ addNewRoom (testRoom aDay t1)
     runDB $ bookingRoom (fromJust mayUserId) (fromJust mayRoomId) aDay (Timespan curTime curTime)
     
@@ -39,15 +39,11 @@ getHomeR = do
     let submission = Nothing :: Maybe (FileInfo, Text)
         handlerName = "getHomeR" :: Text
 
+    -- curDay will be passed to Juliu, to limit the day selection range to 2 month.
     curDT <- liftIO getCurDayAndTime
     let curDay = localDay curDT
-        curTime = localTimeOfDay curDT
-
-    t1 <- liftIO $ getCurrentTime
-
-    --theId <- testBookingRoom curDay curTime t1
-    --runDB $ cancelABooking theId
-    liftIO $ print ("today in Day format: " ++ (show curDay))
+        curDayStr = show curDay
+    liftIO $ print ("today in Day format: " ++ curDayStr)
 
     defaultLayout $ do
         aDomId <- newIdent

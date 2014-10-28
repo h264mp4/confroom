@@ -1,5 +1,5 @@
 {-# LANGUAGE TupleSections, OverloadedStrings, BangPatterns #-}
-module Handler.AddRoom where
+module Handler.Room where
 
 import Import
 import Handler.DBOperation
@@ -63,12 +63,7 @@ addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
         <*> areq boolField "是否现在启用" (Just True)
         <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
                                  "会议室有效期至" Nothing
-        <*> lift (liftIO getCurrentTime)
-
-    where
-    authLevel :: [(Text, Level)]
-    authLevel = [("普通", AuthNormal), ("领导", AuthAdvance),("管理员", AuthAdmin)]
-
+        <*> lift (liftIO $ getCurrentTime)
 
 ------------------------------------------------------------------------------------------
 ---- other helpers

@@ -1,16 +1,15 @@
 User
     email Text
-    password ByteString
+    password Text
     name Text
     level Level
-    verified Bool
-    verifyKey Text
     resetPasswordKey Text
+    firstAdd UTCTime
     UniqueEmail email
     deriving Show
 
 Room
-    number  Text
+    number Text
     level Level
     available Bool
     validTime Day
