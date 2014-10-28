@@ -9,12 +9,13 @@
 -- /dobooking DoBookingR GET POST
 
 /addroom AddRoomR GET POST
+/listroom ListRoomR GET
 -- /editroom EditRoomR GET POST
 -- /deleteroom DeleteRoomR DELETE
-/listroom ListRoomR GET
 
 /adduser AddUserR GET POST
+/listuser ListUserR GET
 -- /edituser EditUserR GET POST
 -- /deleteuser DeleteUserR DELETE
--- /listuser ListUserR GET
     
+/manage ManageR GET

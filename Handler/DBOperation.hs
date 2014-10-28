@@ -49,6 +49,12 @@ editUserProfile theUserId newInfo = do
                      ]
     return ()
 
+listUserProfile = do
+    liftIO $ print "will get all users info"
+    users <- selectList [] [Asc UserId]
+    liftIO $ print users
+    return (users :: [Entity User])   
+
 deleteUser theUserId = do
     liftIO $ print "delete : " 
     liftIO $ print theUserId
@@ -77,7 +83,6 @@ editRoomProfile theRoomId newInfo = do
     return "OK"
 
 listRoomProfile = do
-    liftIO $ print "will get all rooms info"
     rooms <- selectList [] [Asc RoomId]
     liftIO $ print rooms
     return (rooms :: [Entity Room])

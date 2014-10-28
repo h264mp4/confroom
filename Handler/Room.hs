@@ -28,8 +28,6 @@ postAddRoomR = do
     ((result, formWidget), formEnctype) <- runFormPost addRoomForm
     let handlerName = "postAddRoomR" :: Text
     case result of
-        FormFailure errMsg -> defaultLayout $ backWidget ("无效的会议室信息, 请重新输入." :: String)
-
         FormSuccess formInfo -> do
             mayRoomId <- runDB $ addNewRoom formInfo
             case mayRoomId of
@@ -39,6 +37,7 @@ postAddRoomR = do
                      liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
                      liftIO $ print formInfo
                      defaultLayout $ backWidget (toHtmlRoomInfo formInfo)
+        _ -> defaultLayout $ backWidget ("无效的会议室信息, 请重新输入." :: String)
 
     where
     backWidget info = toWidget [hamlet|
