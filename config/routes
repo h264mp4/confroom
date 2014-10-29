@@ -19,3 +19,5 @@
 -- /deleteuser DeleteUserR DELETE
     
 /manage ManageR GET
+/manage/room ManageRoomR GET
+/manage/user ManageUserR GET

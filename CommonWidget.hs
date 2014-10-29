@@ -20,3 +20,7 @@ backNavWidget title info theLink = toWidget [hamlet|
         <div class="col-md-12"> 
             <p> #{preEscapedToMarkup info}                     
 |]
+
+-- list user / room info, with a column that can edit & delete the item.
+listinfoWidget = widgetFile ("listinfo") --link dataType aRandomId
+    

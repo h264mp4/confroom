@@ -27,19 +27,19 @@ postAddUserR = do
     let handlerName = "postAddUserR" :: Text
     case result of
         FormFailure errMsg -> defaultLayout $ do
-                 backNavWidget emptyText ("无效的用户信息, 请重新输入." :: Text) ListUserR
+                 backNavWidget emptyText ("无效的用户信息, 请重新输入." :: Text) ManageUserR
 
         FormSuccess formInfo -> do
             mayUserId <- runDB $ addNewUser formInfo
             case mayUserId of
                  Nothing -> defaultLayout $ do
-                      backNavWidget emptyText ("用户信息已存在，请重新输入" :: Text) ListUserR
+                      backNavWidget emptyText ("用户信息已存在，请重新输入" :: Text) ManageUserR
 
                  Just userId -> do
                      liftIO $ print ("Add new user done: " ++ show (fromJust mayUserId))
                      liftIO $ print formInfo
                      defaultLayout $ do
-                         backNavWidget ("用户信息已保存"::Text) (toHtmlUserInfo formInfo) ListUserR
+                         backNavWidget ("用户信息已保存"::Text) (toHtmlUserInfo formInfo) ManageUserR
 
 simpleFormLayoutForAddUser = BootstrapHorizontalForm
                              {

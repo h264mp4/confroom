@@ -35,15 +35,15 @@ postAddRoomR = do
             mayRoomId <- runDB $ addNewRoom formInfo
             case mayRoomId of
                  Nothing -> defaultLayout $ do
-                           backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ListRoomR
+                           backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ManageRoomR
                  Just roomId -> do
                      liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
                      liftIO $ print formInfo
                      defaultLayout $ do
                          backNavWidget ("会议室信息已保存" :: Text) 
-                                       (toHtmlRoomInfo formInfo) ListRoomR
+                                       (toHtmlRoomInfo formInfo) ManageRoomR
         _ -> defaultLayout $ do
-                 backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ListRoomR
+                 backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
 
 
 addRoomForm :: Form Room
