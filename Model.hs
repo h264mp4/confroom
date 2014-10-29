@@ -23,8 +23,8 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
 
 instance ToJSON (Entity User) where
     toJSON (Entity key userInfo) = object $ 
-                               [ "Email" .= (Data.Text.pack $ show $ userEmail userInfo)
-                               , "姓名"  .= (Data.Text.pack $ show $ userName userInfo) 
+                               [ "Email" .= (userEmail userInfo)
+                               , "姓名"  .= (userName userInfo) 
                                , "权限"  .= (toLevelString $ userLevel userInfo) 
            , "注册时间" .= (Data.Text.pack $ show $ convertUtcToZoneTime $ userFirstAdd userInfo)
                                , "sqlkey" .= (Data.Text.pack $ show $ fromSqlKey key)
@@ -32,11 +32,11 @@ instance ToJSON (Entity User) where
 
 instance ToJSON (Entity Room) where
     toJSON (Entity key roomInfo) = object $ 
-                               [ "会议室编号" .= (Data.Text.pack $ show $ roomNumber roomInfo)
+                               [ "会议室编号" .= (roomNumber roomInfo)
                                , "权限" .= (toLevelString $ roomLevel roomInfo)
                                , "启用" .= ((boolToHanzi $ roomAvailable roomInfo) :: Text)
                                , "有效期"  .= (show $ roomValidTime roomInfo)
-       , "注册时间" .= (Data.Text.pack $ show $ convertUtcToZoneTime $ roomFirstAdd roomInfo)
+           , "注册时间" .= (Data.Text.pack $ show $ convertUtcToZoneTime $ roomFirstAdd roomInfo)
                                , "sqlkey" .= (Data.Text.pack $ show $ fromSqlKey key)
                                ]
 
