@@ -11,7 +11,7 @@ import Data.ByteString (ByteString)
 import Data.Time
 import Handler.MiscTypes
 import Data.Aeson(ToJSON(..), object, (.=))
-
+import qualified Data.Text(pack)
 import Handler.Utils
 
 -- You can define all of your database entities in the entities file.
@@ -23,28 +23,28 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
 
 instance ToJSON (Entity User) where
     toJSON (Entity key userInfo) = object $ 
-                               [ "Email" .= (show $ userEmail userInfo)
-                               , "姓名"  .= (show $ userName userInfo) 
+                               [ "Email" .= (Data.Text.pack $ show $ userEmail userInfo)
+                               , "姓名"  .= (Data.Text.pack $ show $ userName userInfo) 
                                , "权限"  .= (toLevelString $ userLevel userInfo) 
-                               , "注册时间" .= (show $ convertUtcToZoneTime $ userFirstAdd userInfo)
-                               , "sqlkey" .= (show $ fromSqlKey key)
+           , "注册时间" .= (Data.Text.pack $ show $ convertUtcToZoneTime $ userFirstAdd userInfo)
+                               , "sqlkey" .= (Data.Text.pack $ show $ fromSqlKey key)
                                ]
 
 instance ToJSON (Entity Room) where
     toJSON (Entity key roomInfo) = object $ 
-                               [ "会议室编号" .= (show $ roomNumber roomInfo)
+                               [ "会议室编号" .= (Data.Text.pack $ show $ roomNumber roomInfo)
                                , "权限" .= (toLevelString $ roomLevel roomInfo)
-                               , "启用" .= ((boolToHanzi $ roomAvailable roomInfo) :: String)
+                               , "启用" .= ((boolToHanzi $ roomAvailable roomInfo) :: Text)
                                , "有效期"  .= (show $ roomValidTime roomInfo)
-                               , "注册时间" .= (show $ convertUtcToZoneTime $ roomFirstAdd roomInfo)
-                               , "sqlkey" .= (show $ fromSqlKey key)
+       , "注册时间" .= (Data.Text.pack $ show $ convertUtcToZoneTime $ roomFirstAdd roomInfo)
+                               , "sqlkey" .= (Data.Text.pack $ show $ fromSqlKey key)
                                ]
 
 ------------------------------------------------------------------------------------------
 ---- type helper functions
-toLevelString :: Level -> String
+toLevelString :: Level -> Text
 toLevelString lev
-    | lev == AuthNormal  = "普通 "
+    | lev == AuthNormal  = "普通"
     | lev == AuthAdvance = "领导"
     | lev == AuthAdmin   = "管理员"
     | otherwise          = "Wrong Level"

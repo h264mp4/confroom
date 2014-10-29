@@ -1,15 +1,17 @@
 {-# LANGUAGE TupleSections, OverloadedStrings, BangPatterns #-}
 module Handler.Room where
 
+import qualified Data.Text(pack)
+import Data.Maybe(fromJust)
+import Data.Aeson(ToJSON(..), object, (.=))
+import Yesod.Form.Jquery
+import Yesod.Form.Bootstrap3 
+
 import Import
 import CommonWidget
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
-import Data.Maybe(fromJust)
-import Data.Aeson(ToJSON(..), object, (.=))
-import Yesod.Form.Jquery
-import Yesod.Form.Bootstrap3 
 
 ------------------------------------------------------------------------------------------
 ---- AddRoom
@@ -24,8 +26,6 @@ getAddRoomR = do
         addRoomFormId <- newIdent
         $(widgetFile "addroom")
 
-
-
 postAddRoomR :: Handler Html
 postAddRoomR = do
     ((result, formWidget), formEnctype) <- runFormPost addRoomForm
@@ -35,15 +35,15 @@ postAddRoomR = do
             mayRoomId <- runDB $ addNewRoom formInfo
             case mayRoomId of
                  Nothing -> defaultLayout $ do
-                     backNavWidget emptyString ("会议室信息已存在，请重新输入" :: String) ListRoomR
+                           backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ListRoomR
                  Just roomId -> do
                      liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
                      liftIO $ print formInfo
                      defaultLayout $ do
-                         backNavWidget ("会议室信息已保存" :: String) 
+                         backNavWidget ("会议室信息已保存" :: Text) 
                                        (toHtmlRoomInfo formInfo) ListRoomR
         _ -> defaultLayout $ do
-                 backNavWidget emptyString ("无效的会议室信息, 请重新输入." :: String) ListRoomR
+                 backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ListRoomR
 
 
 addRoomForm :: Form Room
@@ -75,14 +75,6 @@ getListRoomR = do
 ------------------------------------------------------------------------------------------
 ---- other helpers
 
-toHtmlRoomInfo :: Room -> String
-toHtmlRoomInfo roomInfo = (
-    "会议室编号: " ++ (show $ roomNumber roomInfo) ++ "<br />  " ++
-    "预订权限: " ++ (toLevelString $ roomLevel roomInfo) ++ "<br />  " ++
-    "即时启用: " ++ (boolToHanzi $ roomAvailable roomInfo) ++ "<br />  " ++
-    "会议室有效期至: " ++ (show $ roomValidTime roomInfo) ++ "<br />  " ++
-    "会议室添加日期: " ++ (show $ convertUtcToZoneTime $ roomFirstAdd roomInfo) ++ "<br />")
-
 simpleFormLayoutForAddRoom = BootstrapHorizontalForm
                              {
                                   bflLabelOffset = ColMd 0
@@ -90,4 +82,13 @@ simpleFormLayoutForAddRoom = BootstrapHorizontalForm
                                  ,bflInputOffset = ColMd 0
                                  ,bflInputSize   = ColMd 4
                              }
+
+toHtmlRoomInfo :: Room -> Text
+toHtmlRoomInfo roomInfo = (
+    "会议室编号: " <> (roomNumber roomInfo) <> "<br />  " <>
+    "预订权限: " <> (toLevelString $ roomLevel roomInfo) <> "<br />  " <>
+    "即时启用: " <> (boolToHanzi $ roomAvailable roomInfo) <> "<br />  " <>
+    "会议室有效期至: " <> (Data.Text.pack $ show $ roomValidTime roomInfo) <> "<br />  " <>
+    "会议室添加日期: " <> (Data.Text.pack $ show $ convertUtcToZoneTime $ roomFirstAdd roomInfo) <> 
+    "<br />")
 

@@ -5,6 +5,7 @@ import Prelude
 import Data.Time
 import Data.String(IsString)
 import System.IO.Unsafe(unsafePerformIO)
+import Data.Text
 
 myTimeZone :: TimeZone
 myTimeZone = unsafePerformIO $ getCurrentTimeZone
@@ -29,3 +30,6 @@ boolToHanzi b | b == True = "是"
 
 emptyString :: String
 emptyString = []
+
+emptyText :: Text
+emptyText = ""

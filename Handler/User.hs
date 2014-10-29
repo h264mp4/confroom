@@ -27,19 +27,19 @@ postAddUserR = do
     let handlerName = "postAddUserR" :: Text
     case result of
         FormFailure errMsg -> defaultLayout $ do
-                 backNavWidget emptyString ("无效的用户信息, 请重新输入." :: String) ListUserR
+                 backNavWidget emptyText ("无效的用户信息, 请重新输入." :: Text) ListUserR
 
         FormSuccess formInfo -> do
             mayUserId <- runDB $ addNewUser formInfo
             case mayUserId of
                  Nothing -> defaultLayout $ do
-                      backNavWidget emptyString ("用户信息已存在，请重新输入" :: String) ListUserR
+                      backNavWidget emptyText ("用户信息已存在，请重新输入" :: Text) ListUserR
 
                  Just userId -> do
                      liftIO $ print ("Add new user done: " ++ show (fromJust mayUserId))
                      liftIO $ print formInfo
                      defaultLayout $ do
-                         backNavWidget ("用户信息已保存"::String) (toHtmlUserInfo formInfo) ListUserR
+                         backNavWidget ("用户信息已保存"::Text) (toHtmlUserInfo formInfo) ListUserR
 
 simpleFormLayoutForAddUser = BootstrapHorizontalForm
                              {
@@ -71,8 +71,8 @@ getListUserR = do
 
 ------------------------------------------------------------------------------------------
 ---- other helpers
-toHtmlUserInfo :: User -> String
+toHtmlUserInfo :: User -> Text
 toHtmlUserInfo userInfo = ( 
-    "姓名: " ++ (show $ userName userInfo) ++ "<br />  " ++
-    "权限: " ++ (toLevelString $ userLevel userInfo) ++ "<br />  " ++
-    "电子邮箱: " ++ (show $ userEmail userInfo) ++ "<br />  ")
+    "姓名: " <> (userName userInfo) <> "<br />  " <>
+    "权限: " <> (toLevelString $ userLevel userInfo) <> "<br />  " <>
+    "电子邮箱: " <> (userEmail userInfo) <> "<br />  ")
