@@ -23,6 +23,7 @@ backNavWidget title info theLink = toWidget [hamlet|
 |]
 
 -- list user / room info, with a column that can edit & delete the item.
-listinfoWidget :: (Route App) -> Text -> Text -> Widget
-listinfoWidget link dataType aRandomId = $(widgetFile "listinfo")
+listinfoWidget :: (Route App) -> (Route App) -> (Route App) -> Text -> Text -> Widget
+listinfoWidget listLink editLink deleteLink dataType aRandomId = $(widgetFile "listinfo")
     
+--     

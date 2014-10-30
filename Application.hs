@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-#LANGUAGE ViewPatterns #-}
 module Application
     ( makeApplication
     , getApplicationDev

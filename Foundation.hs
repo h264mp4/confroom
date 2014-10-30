@@ -1,3 +1,4 @@
+{-#LANGUAGE ViewPatterns #-}
 module Foundation where
 
 import Prelude
@@ -21,6 +22,7 @@ import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
 import Data.Time
+import Data.Int
 import System.Locale
 import Handler.MiscTypes
 

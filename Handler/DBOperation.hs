@@ -51,7 +51,6 @@ editUserProfile theUserId newInfo = do
 
 listUserProfile = do
     users <- selectList [] [Asc UserEmail]
-    liftIO $ print users
     return (users :: [Entity User])   
 
 deleteUser theUserId = do
@@ -83,12 +82,9 @@ editRoomProfile theRoomId newInfo = do
 
 listRoomProfile = do
     rooms <- selectList [] [Asc RoomId]
-    liftIO $ print rooms
     return (rooms :: [Entity Room])
 
-deleteRoom theRoomId = do
-    delete theRoomId
-    return ()
+deleteRoom = delete -- theRoomId
 
 ------------------------------------------------------------------------------------------
 -- | Booking management: bookingRoom,  deleteABooking

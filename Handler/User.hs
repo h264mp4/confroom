@@ -10,6 +10,9 @@ import Data.Maybe(fromJust)
 import Data.Aeson(object, (.=))
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
+import Database.Persist.Sql(toSqlKey)
+import Data.Int(Int64)
+import Data.Text(unpack)
 
 getAddUserR :: Handler Html
 getAddUserR = do
@@ -68,6 +71,17 @@ getListUserR = do
             return $ object $ ["dataRows" .= (map toJSON users), 
                                "total" .= toJSON (length users :: Int)
                               ]
+
+getEditUserR :: Handler Html
+getEditUserR = defaultLayout $ do
+    toWidget [hamlet| <p> it is ok user |]
+
+deleteDeleteUserR :: Handler Value
+deleteDeleteUserR = do
+     Just valueId <- lookupGetParam "deleteId"
+     let theId = toSqlKey $ fromIntegral ((fromJust $ read $ unpack valueId) :: Int)
+     runDB $ deleteUser (theId :: Key User)
+     return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
 
 ------------------------------------------------------------------------------------------
 ---- other helpers

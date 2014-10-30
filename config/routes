@@ -10,13 +10,13 @@
 
 /addroom AddRoomR GET POST
 /listroom ListRoomR GET
--- /editroom EditRoomR GET POST
--- /deleteroom DeleteRoomR DELETE
+/editroom EditRoomR GET
+/deleteroom DeleteRoomR DELETE
 
 /adduser AddUserR GET POST
 /listuser ListUserR GET
--- /edituser EditUserR GET POST
--- /deleteuser DeleteUserR DELETE
+/edituser EditUserR GET
+/deleteuser DeleteUserR DELETE
     
 /manage ManageR GET
 /manage/room ManageRoomR GET

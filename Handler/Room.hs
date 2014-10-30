@@ -12,6 +12,8 @@ import CommonWidget
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
+import Database.Persist.Sql(toSqlKey)
+import Data.Text(unpack)
 
 ------------------------------------------------------------------------------------------
 ---- AddRoom
@@ -68,10 +70,16 @@ getListRoomR = do
             return $ object $ ["dataRows" .= (map toJSON rooms), 
                                "total" .= toJSON (length rooms :: Int)
                               ]
-   
--- editRoomR theId = do
+getEditRoomR :: Handler Html
+getEditRoomR = defaultLayout $ do
+    toWidgetBody [hamlet| <p> it is ok |]
 
-
+deleteDeleteRoomR :: Handler Value
+deleteDeleteRoomR = do
+    Just valueId <- lookupGetParam "deleteId"   
+    let theId = toSqlKey $ fromIntegral ((fromJust $ read $ unpack valueId) :: Int)
+    runDB $ deleteRoom (theId :: Key Room)
+    return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
 ------------------------------------------------------------------------------------------
 ---- other helpers
 

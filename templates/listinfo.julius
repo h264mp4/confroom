@@ -3,21 +3,34 @@ $(document).ready(function() {
 
     // 1. some constant and helper functions
     var infotype = "#{rawJS dataType}";
-    
+    var editButtons = [];    
+    var deleteButtons = [];
+    var ayncFlag = 0;
+
+    function editDeleteFunc(value) {
+        var editItemId = "edit" + infotype + value;
+        var deleteItemId = "delete" + infotype + value;
+        editButtons.push({editItemId: value}); 
+        deleteButtons.push({deleteItemId: value}); 
+        console.log("add " + editItemId);
+        ayncFlag = 1;
+        return "<div> <input type=button value='编辑' id=editItemId class='btn btn-warning'> <input type=button value='删除' id=deleteItemId class='btn btn-danger'> </div>";
+    };
+
     var titleColumns = [];
     titleColumns["typeroom"] = [];
     titleColumns["typeuser"] = [];
 
-    titleColumns["typeroom"].push({field: "会议室编号", title: "会议室编号"});
-    titleColumns["typeroom"].push({field: "权限", title: "权限"});
-    titleColumns["typeroom"].push({field: "启用", title: "启用"});
-    titleColumns["typeroom"].push({field: "有效期", title: "有效期"});
-    titleColumns["typeroom"].push({field: "sqlkey", title: " "});
+    titleColumns["typeroom"].push({field: "会议室编号", title: "会议室编号", align:"center"});
+    titleColumns["typeroom"].push({field: "权限", title: "权限", align:"center"});
+    titleColumns["typeroom"].push({field: "启用", title: "启用", align:"center"});
+    titleColumns["typeroom"].push({field: "有效期", title: "有效期", align:"center"});
+    titleColumns["typeroom"].push({field: "sqlkey", title: " ", formatter: editDeleteFunc, align:"center"});
 
-    titleColumns["typeuser"].push({field: "Email", title: "Email"});
-    titleColumns["typeuser"].push({field: "姓名", title: "姓名"});
-    titleColumns["typeuser"].push({field: "权限", title: "权限"});
-    titleColumns["typeuser"].push({field: "sqlkey", title: " "});
+    titleColumns["typeuser"].push({field: "Email", title: "Email", align:"center"});
+    titleColumns["typeuser"].push({field: "姓名", title: "姓名", align:"center"});
+    titleColumns["typeuser"].push({field: "权限", title: "权限", align:"center"});
+    titleColumns["typeuser"].push({field: "sqlkey", title: " ", formatter: editDeleteFunc, align:"center"});
 
     function setupListTable() {
         console.log("start setup dataTable.");
@@ -32,7 +45,7 @@ $(document).ready(function() {
             pageList: [10,120,30],
 
             // below is the ajax query and response process.
-            url: "@{link}",
+            url: "@{listLink}",
             method: "GET",
             contentType: "application/json",           
             queryParams: function (params) {
@@ -59,7 +72,49 @@ $(document).ready(function() {
             columns: titleColumns[infotype]
         });
 
-        // calculate the cells need merge.
+
+        for (i=0; i < editButtons.length; i++) {
+            console.log("delete button " + i);
+            for (var key in editButtons[i]) {
+                var val = editButtons[i][key];
+                $("#key").attr({"id":key, "value":val});
+                $("#key").click(function (){ 
+                    console("Deleting " + this.id + " | " + this.value);
+                    $.ajax({
+                        type: "EDIT",
+                        url: "@{editLink}",
+                        data: {"editId" : this.value},
+                        dataType: "json",
+                        success: function(data) {
+                            alter(this.id + ' | ' + this.value);
+                            window.location.href = "@{listLink}";
+                        }
+                    });
+                });
+            }
+        }
+     
+        for (i=0; i < deleteButtons.length; i++) {
+            console.log("delete button " + i);
+            for (var key in deleteButtons[i]) {
+                var val = deleteButtons[i][key];
+                $("#key").attr({"id":key, "value":val});
+                $("#key").click(function (){ 
+                    console("Deleting " + this.id + " | " + this.value);
+                    $.ajax({
+                        type: "DELETE",
+                        url: "@{deleteLink}",
+                        data: {"deleteId" : this.value},
+                        dataType: "json",
+                        success: function(data) {
+                            alter(this.id + ' | ' + this.value);
+                            window.location.href = "@{listLink}";
+                        }
+                    });
+                });
+            }
+        }
+
         console.log("finish setup dataTable.");
     };
 
@@ -70,5 +125,17 @@ $(document).ready(function() {
       
     // we setup the initial dataTable
     setupListTable();
+
+    while(ayncFlag <= 0){
+        // make sure all buttons are added.
+    }
+    
+    while(editButtons.length <= 1) {
+        console.log("less than 1")
+    }
+
+
+    console.log("edit" + editButtons);
+    console.log("delete" + deleteButtons);
 
 });

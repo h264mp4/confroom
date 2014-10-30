@@ -11,7 +11,10 @@ import Handler.Utils
 ---- Admin Manage Page
 getManageR :: Handler Html
 getManageR = defaultLayout $ do
-    let link = AddRoomR 
+    let addLink = AddRoomR 
+        listLink = AddRoomR 
+        editLink = EditRoomR 
+        deleteLink = DeleteRoomR 
         dataType = ("typeroom"::Text) 
         buttonName = ("新建会议室":: Text) 
     aRandonId <- newIdent
@@ -20,16 +23,23 @@ getManageR = defaultLayout $ do
 
 getManageUserR :: Handler Html
 getManageUserR = defaultLayout $ do
-    let link = ListUserR 
+    let addLink = AddUserR 
+        listLink = ListUserR
+        editLink = EditUserR 
+        deleteLink = DeleteUserR 
         dataType = ("typeuser"::Text) 
         buttonName = ("新建用户":: Text) 
     aRandonId <- newIdent
     aRandomTableId <- newIdent
     $(widgetFile "manage")
 
+-- listLink editLink deleteLink
 getManageRoomR :: Handler Html
 getManageRoomR = defaultLayout $ do
-    let link = ListRoomR 
+    let addLink = AddRoomR 
+        listLink = ListRoomR
+        editLink = EditRoomR 
+        deleteLink = DeleteRoomR 
         dataType = ("typeroom"::Text) 
         buttonName = ("新建会议室":: Text) 
     aRandonId <- newIdent

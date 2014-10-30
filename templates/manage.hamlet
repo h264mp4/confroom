@@ -11,7 +11,6 @@
                     <li> 
                         <a href=@{ManageUserR}>用户管理
     <div class="col-md-9">
-        ^{listinfoWidget link dataType buttonName}
-        <div class="row" align="left">
-             <input type=button value=#{buttonName} class="btn btn-primary" onClick="location.href='@{link}'">
+        ^{listinfoWidget listLink editLink deleteLink dataType buttonName}
+        <input type=button value=#{buttonName} class="btn btn-primary" onClick="location.href='@{addLink }'">
 
