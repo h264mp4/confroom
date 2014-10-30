@@ -1,6 +1,6 @@
 <br>
 <div class="row" id="manageDiv">
-    <div class="col-md-2">
+    <div class="col-md-3">
         <div class="row">
             <div class="col-md-12" id="manage-slogan">
                 <pre><h4> 用户、会议室管理
@@ -10,8 +10,8 @@
                         <a href=@{ManageRoomR}>会议室管理
                     <li> 
                         <a href=@{ManageUserR}>用户管理
-    <div class="col-md-10">
-        ^{listinfoWidget}
+    <div class="col-md-9">
+        ^{listinfoWidget link dataType buttonName}
         <div class="row" align="left">
              <input type=button value=#{buttonName} class="btn btn-primary" onClick="location.href='@{link}'">
 

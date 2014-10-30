@@ -1,9 +1,12 @@
 $(document).ready(function() {
+    console.log("we start . . .");
+
     // 1. some constant and helper functions
-    var type = #{dataType};
+    var infotype = "#{rawJS dataType}";
     
-    var titleColumns["typeroom"] = [];
-    var titleColumns["typeuser"] = [];
+    var titleColumns = [];
+    titleColumns["typeroom"] = [];
+    titleColumns["typeuser"] = [];
 
     titleColumns["typeroom"].push({field: "会议室编号", title: "会议室编号"});
     titleColumns["typeroom"].push({field: "权限", title: "权限"});
@@ -19,7 +22,7 @@ $(document).ready(function() {
     function setupListTable() {
         console.log("start setup dataTable.");
 
-        $("#{aRandomId}").bootstrapTable({
+        $("##{rawJS aRandomId}").bootstrapTable({
             striped: true,
             pagination: true,
             showToggle: true,
@@ -33,7 +36,7 @@ $(document).ready(function() {
             method: "GET",
             contentType: "application/json",           
             queryParams: function (params) {
-                params[type] = type; 
+                params[infotype] = infotype; 
                 params["limit"] = 200;
                 console.log(params);
                 return params;
@@ -53,17 +56,17 @@ $(document).ready(function() {
                 return {};
             },
 
-            columns: titleColumns[type]
+            columns: titleColumns[infotype]
         });
 
         // calculate the cells need merge.
         console.log("finish setup dataTable.");
-    }
+    };
 
     function destroyDataTable() {
-        $("#{aRandomId}").bootstrapTable("destroy");
-        $("#{aRandomId}").empty(); // this line is crutial for recreate the table.
-    }
+        $("##{rawJS aRandomId}").bootstrapTable("destroy");
+        $("##{rawJS aRandomId}").empty(); // this line is crutial for recreate the table.
+    };
       
     // we setup the initial dataTable
     setupListTable();

@@ -9,8 +9,9 @@ import Data.Maybe(fromJust)
 import Data.Aeson(ToJSON(..), object, (.=))
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
+import Text.Julius(rawJS)
 
-
+backNavWidget :: Text -> Text -> (Route App) -> Widget
 backNavWidget title info theLink = toWidget [hamlet|
     <div class="row">
         <div class="col-md-12">
@@ -22,5 +23,6 @@ backNavWidget title info theLink = toWidget [hamlet|
 |]
 
 -- list user / room info, with a column that can edit & delete the item.
-listinfoWidget = widgetFile ("listinfo") --link dataType aRandomId
+listinfoWidget :: (Route App) -> Text -> Text -> Widget
+listinfoWidget link dataType aRandomId = $(widgetFile "listinfo")
     

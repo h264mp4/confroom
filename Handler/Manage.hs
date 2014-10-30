@@ -9,12 +9,29 @@ import Handler.Utils
 
 ------------------------------------------------------------------------------------------
 ---- Admin Manage Page
+getManageR :: Handler Html
+getManageR = defaultLayout $ do
+    let link = AddRoomR 
+        dataType = ("typeroom"::Text) 
+        buttonName = ("新建会议室":: Text) 
+    aRandonId <- newIdent
+    aRandomTableId <- newIdent
+    toWidget $(widgetFile "manage")
 
-getManageR = getManageRoomR
-getManageRoomR = getManagePage AddRoomR ("typeroom"::Text) ("新建会议室":: Text) 
-getManageUserR = getManagePage AddUserR ("typeuser"::Text) ("新建用户"  :: Text) 
+getManageUserR :: Handler Html
+getManageUserR = defaultLayout $ do
+    let link = ListUserR 
+        dataType = ("typeuser"::Text) 
+        buttonName = ("新建用户":: Text) 
+    aRandonId <- newIdent
+    aRandomTableId <- newIdent
+    $(widgetFile "manage")
 
-getManagePage link dataType buttonName = defaultLayout $ do
-    aRandomId <- newIdent
+getManageRoomR :: Handler Html
+getManageRoomR = defaultLayout $ do
+    let link = ListRoomR 
+        dataType = ("typeroom"::Text) 
+        buttonName = ("新建会议室":: Text) 
+    aRandonId <- newIdent
     aRandomTableId <- newIdent
     $(widgetFile "manage")
