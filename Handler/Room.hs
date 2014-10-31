@@ -2,8 +2,8 @@
 module Handler.Room where
 
 import qualified Data.Text(pack)
-import Data.Maybe(fromJust)
-import Data.Aeson(ToJSON(..), object, (.=))
+import Data.Maybe(fromJust,isJust)
+import Data.Aeson(ToJSON(..), object, (.=), decode)
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
 
@@ -13,9 +13,12 @@ import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
 
+import Control.Monad(when)
 import Database.Persist.Sql(toSqlKey)
 import Data.Text(unpack)
 import Data.Conduit
+import Data.Text.Encoding(encodeUtf8)
+import Data.ByteString.Lazy(fromStrict)
 import qualified Data.Conduit.Text as CT
 import qualified Data.Conduit.List as CL
 
@@ -83,12 +86,22 @@ deleteDeleteRoomR = do
     -- mayValueId <- lookupGetParam "deleteId"   
     -- liftIO $ print mayValueId
     -- Just valueId <- lookupGetParam "deleteId"   
-    -- let theId = toSqlKey $ fromIntegral ((fromJust $ read $ unpack valueId) :: Int)
+    -- let theId 
     --let theId = toSqlKey $ fromIntegral 2
     --runDB $ deleteRoom (theId :: Key Room)
     texts <- rawRequestBody $$ CT.decode CT.utf8 =$ CL.consume
     liftIO $ print texts
-    return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
+    let mayId = decode . fromStrict . encodeUtf8 $ texts !! 0
+    when (isJust mayId) ((doDelete $ fromJust mayId) >> return ()) 
+    return $ object $ [("ret" :: Text) .= ("ok" :: Text)]    
+
+    where 
+    doDelete deleteObj = do
+        let theId = toSqlKey $ (read . unpack $ deleteId deleteObj)
+        liftIO $ print theId
+        runDB $ deleteRoom (theId :: Key Room)
+        return ()
+
 ------------------------------------------------------------------------------------------
 ---- other helpers
 
