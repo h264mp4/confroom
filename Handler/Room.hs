@@ -1,9 +1,6 @@
 {-# LANGUAGE TupleSections, OverloadedStrings, BangPatterns #-}
 module Handler.Room where
 
-import qualified Data.Text(pack)
-import Data.Maybe(fromJust,isJust)
-import Data.Aeson(ToJSON(..), object, (.=), decode)
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
 
@@ -21,6 +18,9 @@ import Data.Text.Encoding(encodeUtf8)
 import Data.ByteString.Lazy(fromStrict)
 import qualified Data.Conduit.Text as CT
 import qualified Data.Conduit.List as CL
+import qualified Data.Text(pack)
+import Data.Maybe(fromJust,isJust)
+import Data.Aeson(ToJSON(..), object, (.=), decode)
 
 ------------------------------------------------------------------------------------------
 ---- AddRoom
@@ -82,18 +82,15 @@ getEditRoomR = return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
 
 deleteDeleteRoomR :: Handler Value
 deleteDeleteRoomR = do
-    -- liftIO $ print "coming in"
-    -- mayValueId <- lookupGetParam "deleteId"   
-    -- liftIO $ print mayValueId
-    -- Just valueId <- lookupGetParam "deleteId"   
-    -- let theId 
-    --let theId = toSqlKey $ fromIntegral 2
-    --runDB $ deleteRoom (theId :: Key Room)
     texts <- rawRequestBody $$ CT.decode CT.utf8 =$ CL.consume
     liftIO $ print texts
     let mayId = decode . fromStrict . encodeUtf8 $ texts !! 0
-    when (isJust mayId) ((doDelete $ fromJust mayId) >> return ()) 
-    return $ object $ [("ret" :: Text) .= ("ok" :: Text)]    
+        bValidData = isJust mayId
+    if bValidData
+       then do
+            doDelete $ fromJust mayId
+            return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
+       else return $ object $ [("ret" :: Text) .= ("invalid data" :: Text)]
 
     where 
     doDelete deleteObj = do

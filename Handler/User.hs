@@ -6,13 +6,21 @@ import CommonWidget
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
-import Data.Maybe(fromJust)
+import Data.Maybe(isJust, fromJust)
 import Data.Aeson(object, (.=))
 import Yesod.Form.Jquery
 import Yesod.Form.Bootstrap3 
 import Database.Persist.Sql(toSqlKey)
+
 import Data.Int(Int64)
 import Data.Text(unpack)
+import Data.Conduit
+import Data.Text.Encoding(encodeUtf8)
+import Data.ByteString.Lazy(fromStrict)
+import qualified Data.Conduit.Text as CT
+import qualified Data.Conduit.List as CL
+import Data.Aeson(ToJSON(..), object, (.=), decode)
+
 
 getAddUserR :: Handler Html
 getAddUserR = do
@@ -78,10 +86,23 @@ getEditUserR = defaultLayout $ do
 
 deleteDeleteUserR :: Handler Value
 deleteDeleteUserR = do
-     Just valueId <- lookupGetParam "deleteId"
-     let theId = toSqlKey $ fromIntegral ((fromJust $ read $ unpack valueId) :: Int)
-     runDB $ deleteUser (theId :: Key User)
-     return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
+    texts <- rawRequestBody $$ CT.decode CT.utf8 =$ CL.consume
+    liftIO $ print texts
+    let mayId = decode . fromStrict . encodeUtf8 $ texts !! 0
+        bValidData = isJust mayId
+    if bValidData
+       then do
+            doDelete $ fromJust mayId
+            return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
+       else return $ object $ [("ret" :: Text) .= ("invalid data" :: Text)]
+
+    where 
+    doDelete deleteObj = do
+        let theId = toSqlKey $ (read . unpack $ deleteId deleteObj)
+        liftIO $ print theId
+        runDB $ deleteUser (theId :: Key User)
+        return ()
+
 
 ------------------------------------------------------------------------------------------
 ---- other helpers

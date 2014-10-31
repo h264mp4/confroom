@@ -13,7 +13,10 @@ $(document).ready(function() {
         editButtons.push([editItemId, value]); 
         deleteButtons.push([deleteItemId, value]); 
 
-        return "<div> <input type=button value='编辑' id=" + editItemId + " class='btn btn-warning'> <input type=button value='删除' id=" + deleteItemId + " class='btn btn-danger'> </div>";
+        var deleteBtnPart = "<input type=button value='删除' id=" + deleteItemId + " class='btn btn-danger' >";
+        var editBtnPart = "<input type=button value='编辑' id=" + editItemId + " class='btn btn-warning' >";
+
+        return "<div> " + editBtnPart + deleteBtnPart + " </div>";
     };
 
     var titleColumns = [];
@@ -75,18 +78,21 @@ $(document).ready(function() {
                     //console.log("EditButton" + i + ". Key: " + key + ", value: " + val);
                     $("#"+key).attr({"btnid":key, "dbid":val});
                     $("#"+key).click(function (){ 
-                        var jData = JSON.stringify({"editId" : $(this).attr("dbid")});
-                        $.ajax({
-                            processData: false,
-                            type: "EDIT",
-                            url: "@{editLink}",
-                            data: jData,
-                            dataType: "json",
-                            success: function(data) {
-                                window.location.reload();
-                                //window.location.href = window.location.href; //"@{listLink}";
-                            }
-                        });
+                        var bDelete = confirm("将永久的删除此条目");
+                        if (bDelete) {
+                            var jData = JSON.stringify({"editId" : $(this).attr("dbid")});
+                            $.ajax({
+                                processData: false,
+                                type: "EDIT",
+                                url: "@{editLink}",
+                                data: jData,
+                                dataType: "json",
+                                success: function(data) {
+                                    window.location.reload();
+                                    //window.location.href = window.location.href;
+                                }
+                            });
+                        }
                     });
                 }
                 
@@ -96,20 +102,22 @@ $(document).ready(function() {
                     console.log("DeleteButton" + i + ". Key" + key + ", value" + val);
          
                     $("#"+key).attr({"btnid":key, "dbid":val});
-                    $("#"+key).click(function (){ 
-                        var jData = JSON.stringify({"deleteId" : $(this).attr("dbid")});
-                        $.ajax({
-                            processData: false,
-                            type: "DELETE",
-                            url: "@{deleteLink}",
-                            data: jData,
-                            dataType: "json",
-                            success: function(data) {
-                                alert("删除成功");
-                                window.location.reload();
-                                //window.location.href = window.location.href; //"@{listLink}";
-                            }
-                        });
+                    $("#"+key).click(function (){                        
+                        var bDelete = confirm("将永久的删除此条目");
+                        if (bDelete) {
+                            var jData = JSON.stringify({"deleteId" : $(this).attr("dbid")});
+                            $.ajax({
+                                processData: false,
+                                type: "DELETE",
+                                url: "@{deleteLink}",
+                                data: jData,
+                                dataType: "json",
+                                success: function(data) {
+                                    window.location.reload();
+                                    //window.location.href = window.location.href;
+                                }
+                            });
+                         }
                     });
                 }
             },

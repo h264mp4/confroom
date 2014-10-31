@@ -54,8 +54,6 @@ listUserProfile = do
     return (users :: [Entity User])   
 
 deleteUser theUserId = do
-    liftIO $ print "delete : " 
-    liftIO $ print theUserId
     delete theUserId
     return ()
 
