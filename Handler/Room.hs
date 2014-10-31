@@ -12,8 +12,12 @@ import CommonWidget
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
+
 import Database.Persist.Sql(toSqlKey)
 import Data.Text(unpack)
+import Data.Conduit
+import qualified Data.Conduit.Text as CT
+import qualified Data.Conduit.List as CL
 
 ------------------------------------------------------------------------------------------
 ---- AddRoom
@@ -70,15 +74,20 @@ getListRoomR = do
             return $ object $ ["dataRows" .= (map toJSON rooms), 
                                "total" .= toJSON (length rooms :: Int)
                               ]
-getEditRoomR :: Handler Html
-getEditRoomR = defaultLayout $ do
-    toWidgetBody [hamlet| <p> it is ok |]
+getEditRoomR :: Handler Value
+getEditRoomR = return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
 
 deleteDeleteRoomR :: Handler Value
 deleteDeleteRoomR = do
-    Just valueId <- lookupGetParam "deleteId"   
-    let theId = toSqlKey $ fromIntegral ((fromJust $ read $ unpack valueId) :: Int)
-    runDB $ deleteRoom (theId :: Key Room)
+    -- liftIO $ print "coming in"
+    -- mayValueId <- lookupGetParam "deleteId"   
+    -- liftIO $ print mayValueId
+    -- Just valueId <- lookupGetParam "deleteId"   
+    -- let theId = toSqlKey $ fromIntegral ((fromJust $ read $ unpack valueId) :: Int)
+    --let theId = toSqlKey $ fromIntegral 2
+    --runDB $ deleteRoom (theId :: Key Room)
+    texts <- rawRequestBody $$ CT.decode CT.utf8 =$ CL.consume
+    liftIO $ print texts
     return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
 ------------------------------------------------------------------------------------------
 ---- other helpers

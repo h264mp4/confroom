@@ -5,9 +5,12 @@ import Import
 import Handler.DBOperation
 import Handler.MiscTypes
 import Handler.Utils
+import Text.Julius(rawJS)
+
 import Data.Maybe(fromJust)
 import Data.Aeson(object, (.=))
 import Network.Wai
+
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -44,8 +47,7 @@ getHomeR = do
     let curDay = localDay curDT
         curTime = localTimeOfDay curDT
         curDayStr = show curDay
-    liftIO $ print ("today in Day format: " ++ curDayStr ++ ". Time: " ++ (show curTime))
-
+    -- liftIO $ print ("today in Day format: " ++ curDayStr ++ ". Time: " ++ (show curTime))
     defaultLayout $ do
         aDomId <- newIdent
         $(widgetFile "homepage")

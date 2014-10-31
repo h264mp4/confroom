@@ -5,16 +5,15 @@ $(document).ready(function() {
     var infotype = "#{rawJS dataType}";
     var editButtons = [];    
     var deleteButtons = [];
-    var ayncFlag = 0;
 
     function editDeleteFunc(value) {
         var editItemId = "edit" + infotype + value;
+        console.log("real id is " + editItemId);
         var deleteItemId = "delete" + infotype + value;
-        editButtons.push({editItemId: value}); 
-        deleteButtons.push({deleteItemId: value}); 
-        console.log("add " + editItemId);
-        ayncFlag = 1;
-        return "<div> <input type=button value='编辑' id=editItemId class='btn btn-warning'> <input type=button value='删除' id=deleteItemId class='btn btn-danger'> </div>";
+        editButtons.push([editItemId, value]); 
+        deleteButtons.push([deleteItemId, value]); 
+
+        return "<div> <input type=button value='编辑' id=" + editItemId + " class='btn btn-warning'> <input type=button value='删除' id=" + deleteItemId + " class='btn btn-danger'> </div>";
     };
 
     var titleColumns = [];
@@ -69,51 +68,55 @@ $(document).ready(function() {
                 return {};
             },
 
+            onLoadSuccess: function() {
+                for (i=0; i < editButtons.length; i++) {
+                    var key = editButtons[i][0];
+                    var val = editButtons[i][1];
+                    //console.log("EditButton" + i + ". Key: " + key + ", value: " + val);
+                    $("#"+key).attr({"btnid":key, "dbid":val});
+                    $("#"+key).click(function (){ 
+                        var jData = JSON.stringify({"editId" : $(this).attr("dbid")});
+                        $.ajax({
+                            processData: false,
+                            type: "EDIT",
+                            url: "@{editLink}",
+                            data: jData,
+                            dataType: "json",
+                            success: function(data) {
+                                window.location.reload();
+                                //window.location.href = window.location.href; //"@{listLink}";
+                            }
+                        });
+                    });
+                }
+                
+                for (i=0; i < deleteButtons.length; i++) {
+                    var key = deleteButtons[i][0];
+                    var val = deleteButtons[i][1];
+                    console.log("DeleteButton" + i + ". Key" + key + ", value" + val);
+         
+                    $("#"+key).attr({"btnid":key, "dbid":val});
+                    $("#"+key).click(function (){ 
+                        var jData = JSON.stringify({"deleteId" : $(this).attr("dbid")});
+                        $.ajax({
+                            processData: false,
+                            type: "DELETE",
+                            url: "@{deleteLink}",
+                            data: jData,
+                            dataType: "json",
+                            success: function(data) {
+                                alert("删除成功");
+                                window.location.reload();
+                                //window.location.href = window.location.href; //"@{listLink}";
+                            }
+                        });
+                    });
+                }
+            },
+
             columns: titleColumns[infotype]
+
         });
-
-
-        for (i=0; i < editButtons.length; i++) {
-            console.log("delete button " + i);
-            for (var key in editButtons[i]) {
-                var val = editButtons[i][key];
-                $("#key").attr({"id":key, "value":val});
-                $("#key").click(function (){ 
-                    console("Deleting " + this.id + " | " + this.value);
-                    $.ajax({
-                        type: "EDIT",
-                        url: "@{editLink}",
-                        data: {"editId" : this.value},
-                        dataType: "json",
-                        success: function(data) {
-                            alter(this.id + ' | ' + this.value);
-                            window.location.href = "@{listLink}";
-                        }
-                    });
-                });
-            }
-        }
-     
-        for (i=0; i < deleteButtons.length; i++) {
-            console.log("delete button " + i);
-            for (var key in deleteButtons[i]) {
-                var val = deleteButtons[i][key];
-                $("#key").attr({"id":key, "value":val});
-                $("#key").click(function (){ 
-                    console("Deleting " + this.id + " | " + this.value);
-                    $.ajax({
-                        type: "DELETE",
-                        url: "@{deleteLink}",
-                        data: {"deleteId" : this.value},
-                        dataType: "json",
-                        success: function(data) {
-                            alter(this.id + ' | ' + this.value);
-                            window.location.href = "@{listLink}";
-                        }
-                    });
-                });
-            }
-        }
 
         console.log("finish setup dataTable.");
     };
@@ -125,15 +128,6 @@ $(document).ready(function() {
       
     // we setup the initial dataTable
     setupListTable();
-
-    while(ayncFlag <= 0){
-        // make sure all buttons are added.
-    }
-    
-    while(editButtons.length <= 1) {
-        console.log("less than 1")
-    }
-
 
     console.log("edit" + editButtons);
     console.log("delete" + deleteButtons);
