@@ -72,27 +72,14 @@ $(document).ready(function() {
             },
 
             onLoadSuccess: function() {
+                var i = 0;
                 for (i=0; i < editButtons.length; i++) {
                     var key = editButtons[i][0];
                     var val = editButtons[i][1];
                     //console.log("EditButton" + i + ". Key: " + key + ", value: " + val);
                     $("#"+key).attr({"btnid":key, "dbid":val});
                     $("#"+key).click(function (){ 
-                        var bDelete = confirm("将永久的删除此条目");
-                        if (bDelete) {
-                            var jData = JSON.stringify({"editId" : $(this).attr("dbid")});
-                            $.ajax({
-                                processData: false,
-                                type: "EDIT",
-                                url: "@{editLink}",
-                                data: jData,
-                                dataType: "json",
-                                success: function(data) {
-                                    window.location.reload();
-                                    //window.location.href = window.location.href;
-                                }
-                            });
-                        }
+                        window.location.href = "@{editLink}/?editId=" + $(this).attr("dbid");
                     });
                 }
                 

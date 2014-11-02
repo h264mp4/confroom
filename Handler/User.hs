@@ -44,13 +44,13 @@ postAddUserR = do
             mayUserId <- runDB $ addNewUser formInfo
             case mayUserId of
                  Nothing -> defaultLayout $ do
-                      backNavWidget emptyText ("用户信息已存在，请重新输入" :: Text) ManageUserR
+                   backNavWidget emptyText ("用户信息已存在，请重新输入" :: Text) ManageUserR
 
                  Just userId -> do
                      liftIO $ print ("Add new user done: " ++ show (fromJust mayUserId))
                      liftIO $ print formInfo
                      defaultLayout $ do
-                         backNavWidget ("用户信息已保存"::Text) (toHtmlUserInfo formInfo) ManageUserR
+                       backNavWidget ("用户信息已保存"::Text) (toHtmlUserInfo formInfo) ManageUserR
 
 simpleFormLayoutForAddUser = BootstrapHorizontalForm
                              {
@@ -71,10 +71,24 @@ getListUserR = do
                                "total" .= toJSON (length users :: Int)
                               ]
 
-
 getEditUserR :: Handler Html
-getEditUserR = defaultLayout $ do
-    toWidget [hamlet| <p> it is ok user |]
+getEditUserR = do
+    mayId <- lookupGetParam "editId"
+    liftIO $ print $ "edituser param: "
+    liftIO $ print $ mayId
+    let bValidData = isJust mayId
+    if not bValidData
+       then notFound
+       else do
+            let theId = toSqlKey . read . unpack . fromJust $ mayId
+            userInfo <- runDB $ get404 (theId :: Key User)
+            (editUserWidget, formEnctype) <- generateFormPost (editUserForm userInfo)
+            let submission = Nothing :: Maybe (FileInfo, Text)
+                handlerName = "getEditUserR" :: Text
+            
+            defaultLayout $ do
+                editUserFormId <- newIdent
+                $(widgetFile "edituser")
 
 deleteDeleteUserR :: Handler Value
 deleteDeleteUserR = do
@@ -108,10 +122,17 @@ addUserForm = renderBootstrap3 simpleFormLayoutForAddUser $ User
         <*> pure "" -- areq textField "resetKey" (Just "physics")
         <*> lift (liftIO getCurrentTime)
 
+editUserForm :: User -> Form User
+editUserForm userInfo = renderBootstrap3 simpleFormLayoutForAddUser $ User
+        <$> pure (userEmail userInfo)
+        <*> areq textField "密码" (Just $ userPassword userInfo)
+        <*> areq textField "姓名" (Just $ userName userInfo)
+        <*> areq (selectFieldList authLevel) "权限" (Just $ userLevel userInfo)
+        <*> pure "" -- areq textField "resetKey" (Just "physics")
+        <*> pure (userFirstAdd userInfo)
+
 toHtmlUserInfo :: User -> Text
 toHtmlUserInfo userInfo = ( 
     "姓名: " <> (userName userInfo) <> "<br />  " <>
     "权限: " <> (toLevelString $ userLevel userInfo) <> "<br />  " <>
     "电子邮箱: " <> (userEmail userInfo) <> "<br />  ")
-
-

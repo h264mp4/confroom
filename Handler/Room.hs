@@ -66,28 +66,29 @@ getListRoomR = do
        else do
             return $ object $ ["dataRows" .= (map toJSON rooms), 
                                "total" .= toJSON (length rooms :: Int)
-
                               ]
 
 -- edit room will only edit the valid date / available / level
 getEditRoomR :: Handler Html
 getEditRoomR = do
-    ((result, formWidget), formEnctype) <- runFormPost editRoomForm
-    let handlerName = "eidtAddRoomR" :: Text
-    case result of
-        FormSuccess formInfo -> do
-            mayRoomId <- runDB $ addNewRoom formInfo
-            case mayRoomId of
-                 Nothing -> defaultLayout $ do
-                          backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ManageRoomR
-                 Just roomId -> do
-                     liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
-                     liftIO $ print formInfo
-                     defaultLayout $ do
-                         backNavWidget ("会议室信息已保存" :: Text) 
-                                       (toHtmlRoomInfo formInfo) ManageRoomR
-        _ -> defaultLayout $ do
-                 backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
+    mayId <- lookupGetParam "editId"
+    liftIO $ print $ "editroom param: "
+    liftIO $ print $ mayId
+    let bValidData = isJust mayId
+    if not bValidData
+       then notFound
+       else do
+            let theId = toSqlKey . read . unpack . fromJust $ mayId
+            roomInfo <- runDB $ get404 (theId :: Key Room)
+            let roomNum = roomNumber roomInfo
+                validDay = roomValidTime roomInfo
+            (editRoomWidget, formEnctype) <- generateFormPost (editRoomForm roomNum validDay)
+            let submission = Nothing :: Maybe (FileInfo, Text)
+                handlerName = "getEditRoomR" :: Text
+            
+            defaultLayout $ do
+                editRoomFormId <- newIdent
+                $(widgetFile "editroom")
 
 deleteDeleteRoomR :: Handler Value
 deleteDeleteRoomR = do
@@ -103,8 +104,7 @@ deleteDeleteRoomR = do
 
     where 
     doDelete deleteObj = do
-        let theId = toSqlKey $ (read . unpack $ deleteId deleteObj)
-        liftIO $ print theId
+        let theId = toSqlKey . read . unpack . deleteId $ deleteObj
         runDB $ deleteRoom (theId :: Key Room)
         return ()
 
@@ -129,11 +129,20 @@ toHtmlRoomInfo roomInfo = (
     "<br />")
 
 
-editRoomForm :: Form Room
-editRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
-        <$> pure "会议室编号" 
+addRoomForm :: Form Room
+addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
+        <$> areq textField "会议室编号" Nothing
         <*> areq (selectFieldList authLevel) "预订权限" Nothing
         <*> areq boolField "是否现在启用" (Just True)
         <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
-                                 "会议室有效期至" Nothing
+                                 "会议室有效期至" (Just $ fromGregorian 2028 1 1)
+        <*> lift (liftIO $ getCurrentTime)
+
+editRoomForm :: Text -> Day -> Form Room
+editRoomForm roomNumber validDay = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
+        <$> pure roomNumber
+        <*> areq (selectFieldList authLevel) "预订权限" Nothing
+        <*> areq boolField "是否现在启用" (Just True)
+        <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
+                                 "会议室有效期至" (Just validDay)
         <*> lift (liftIO $ getCurrentTime)

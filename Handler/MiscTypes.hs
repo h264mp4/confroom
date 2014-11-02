@@ -17,10 +17,10 @@ data Timespan = Timespan TimeOfDay TimeOfDay
     deriving (Show, Read, Eq, Ord)
 derivePersistField "Timespan"
 
-data DeleteId = DeleteId { deleteId :: Text}
+data DeleteId = DeleteId {deleteId :: Text}
     deriving (Show, Generic) 
 
-data EditId = EditId { editId :: Text}
+data EditId = EditId {editId :: Text}
     deriving (Show, Generic) 
 
 instance FromJSON DeleteId
