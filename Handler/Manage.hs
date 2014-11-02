@@ -12,7 +12,7 @@ import Handler.Utils
 getManageR :: Handler Html
 getManageR = defaultLayout $ do
     let addLink = AddRoomR 
-        listLink = AddRoomR 
+        listLink = ListRoomR 
         editLink = EditRoomR 
         deleteLink = DeleteRoomR 
         dataType = ("typeroom"::Text) 

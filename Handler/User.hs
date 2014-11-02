@@ -60,15 +60,6 @@ simpleFormLayoutForAddUser = BootstrapHorizontalForm
                                  ,bflInputSize   = ColMd 4
                              }
 
-addUserForm :: Form User
-addUserForm = renderBootstrap3 simpleFormLayoutForAddUser $ User
-        <$> areq emailField "电子邮箱" Nothing
-        <*> areq textField "密码" (Just "physics")
-        <*> areq textField "姓名" Nothing
-        <*> areq (selectFieldList authLevel) "权限" Nothing
-        <*> pure "" -- areq textField "resetKey" (Just "physics")
-        <*> lift (liftIO getCurrentTime)
-
 getListUserR :: Handler Value
 getListUserR = do
     -- TODO: User Auth Widget
@@ -79,6 +70,7 @@ getListUserR = do
             return $ object $ ["dataRows" .= (map toJSON users), 
                                "total" .= toJSON (length users :: Int)
                               ]
+
 
 getEditUserR :: Handler Html
 getEditUserR = defaultLayout $ do
@@ -106,8 +98,20 @@ deleteDeleteUserR = do
 
 ------------------------------------------------------------------------------------------
 ---- other helpers
+
+addUserForm :: Form User
+addUserForm = renderBootstrap3 simpleFormLayoutForAddUser $ User
+        <$> areq emailField "电子邮箱" Nothing
+        <*> areq textField "密码" (Just "physics")
+        <*> areq textField "姓名" Nothing
+        <*> areq (selectFieldList authLevel) "权限" Nothing
+        <*> pure "" -- areq textField "resetKey" (Just "physics")
+        <*> lift (liftIO getCurrentTime)
+
 toHtmlUserInfo :: User -> Text
 toHtmlUserInfo userInfo = ( 
     "姓名: " <> (userName userInfo) <> "<br />  " <>
     "权限: " <> (toLevelString $ userLevel userInfo) <> "<br />  " <>
     "电子邮箱: " <> (userEmail userInfo) <> "<br />  ")
+
+

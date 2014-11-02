@@ -44,7 +44,7 @@ postAddRoomR = do
             mayRoomId <- runDB $ addNewRoom formInfo
             case mayRoomId of
                  Nothing -> defaultLayout $ do
-                           backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ManageRoomR
+                          backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ManageRoomR
                  Just roomId -> do
                      liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
                      liftIO $ print formInfo
@@ -53,16 +53,6 @@ postAddRoomR = do
                                        (toHtmlRoomInfo formInfo) ManageRoomR
         _ -> defaultLayout $ do
                  backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
-
-
-addRoomForm :: Form Room
-addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
-        <$> areq textField "会议室编号" Nothing
-        <*> areq (selectFieldList authLevel) "预订权限" Nothing
-        <*> areq boolField "是否现在启用" (Just True)
-        <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
-                                 "会议室有效期至" Nothing
-        <*> lift (liftIO $ getCurrentTime)
 
 ------------------------------------------------------------------------------------------
 ---- list room
@@ -76,9 +66,28 @@ getListRoomR = do
        else do
             return $ object $ ["dataRows" .= (map toJSON rooms), 
                                "total" .= toJSON (length rooms :: Int)
+
                               ]
-getEditRoomR :: Handler Value
-getEditRoomR = return $ object $ [("ret" :: Text) .= ("ok" :: Text)]
+
+-- edit room will only edit the valid date / available / level
+getEditRoomR :: Handler Html
+getEditRoomR = do
+    ((result, formWidget), formEnctype) <- runFormPost editRoomForm
+    let handlerName = "eidtAddRoomR" :: Text
+    case result of
+        FormSuccess formInfo -> do
+            mayRoomId <- runDB $ addNewRoom formInfo
+            case mayRoomId of
+                 Nothing -> defaultLayout $ do
+                          backNavWidget emptyText ("会议室信息已存在，请重新输入" :: Text) ManageRoomR
+                 Just roomId -> do
+                     liftIO $ print ("Add new room done: " ++ show (fromJust mayRoomId))
+                     liftIO $ print formInfo
+                     defaultLayout $ do
+                         backNavWidget ("会议室信息已保存" :: Text) 
+                                       (toHtmlRoomInfo formInfo) ManageRoomR
+        _ -> defaultLayout $ do
+                 backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
 
 deleteDeleteRoomR :: Handler Value
 deleteDeleteRoomR = do
@@ -119,3 +128,12 @@ toHtmlRoomInfo roomInfo = (
     "会议室添加日期: " <> (Data.Text.pack $ show $ convertUtcToZoneTime $ roomFirstAdd roomInfo) <> 
     "<br />")
 
+
+editRoomForm :: Form Room
+editRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
+        <$> pure "会议室编号" 
+        <*> areq (selectFieldList authLevel) "预订权限" Nothing
+        <*> areq boolField "是否现在启用" (Just True)
+        <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
+                                 "会议室有效期至" Nothing
+        <*> lift (liftIO $ getCurrentTime)
