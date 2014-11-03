@@ -10,7 +10,8 @@
 
 /addroom AddRoomR GET POST
 /listroom ListRoomR GET
-/editroom/#RoomId EditRoomR GET POST
+/editroom EditRoomR GET
+/finishedit/#RoomId FinishEditRoomR POST
 /deleteroom DeleteRoomR DELETE
 
 /adduser AddUserR GET POST

@@ -69,45 +69,39 @@ getListRoomR = do
                               ]
 
 -- edit room will only edit the valid date / available / level
-getEditRoomR :: RoomId -> Handler Html
+getEditRoomR :: Handler Html
 getEditRoomR = do
     mayId <- lookupGetParam "editId"
-    liftIO $ print $ "editroom param: "
+    liftIO $ print $ "get editroom param: "
     liftIO $ print $ mayId
     let bValidData = isJust mayId
     if not bValidData
        then notFound
        else do
-            let theId = toSqlKey . read . unpack . fromJust $ mayId
-            roomInfo <- runDB $ get404 (theId :: Key Room)
+            let theId = (toSqlKey . read . unpack . fromJust $ mayId) :: RoomId
+            roomInfo <- runDB $ get404 theId
             (editRoomWidget, formEnctype) <- generateFormPost (editRoomForm $ Just roomInfo)
             let submission = Nothing :: Maybe (FileInfo, Text)
                 handlerName = "getEditRoomR" :: Text
-            
             defaultLayout $ do
                 editRoomFormId <- newIdent
                 $(widgetFile "editroom")
 
-postEditRoomR :: Handler Html
-postEditRoomR  = do
-    mayId <- lookupGetParam "editId"
-    liftIO $ print $ "editroom param: "
-    liftIO $ print $ mayId
-    let bValidData = isJust mayId
-    if not bValidData
-       then notFound
-       else do
-            let theId = toSqlKey . read . unpack . fromJust $ mayId
-
-            ((result, formWidget), formEnctype) <- runFormPost (editRoomForm Nothing)
+postFinishEditRoomR :: RoomId -> Handler Html
+postFinishEditRoomR theId = do
+            liftIO $ print theId
+    -- let bValidData = isJust mayId
+    --if not bValidData
+    --   then notFound
+    --   else do
+            -- let theId = toSqlKey . read . unpack . fromJust $ mayId
+            theInfo <- runDB $ get404 theId
+            ((result, formWidget), formEnctype) <- runFormPost (editRoomForm . Just $ theInfo)
             let handlerName = "postEditRoomR" :: Text
             liftIO $ print result
             case result of
                 FormSuccess formInfo -> do
-                    theInfo <- runDB $ get404 theId
                     runDB $ updateRoomProfile theId formInfo {roomNumber = (roomNumber theInfo)}
-                    liftIO $ print ("Edit room done: ")
-                    liftIO $ print formInfo
                     defaultLayout $ do
                         backNavWidget ("会议室信息已更新" :: Text) 
                                            (toHtmlRoomInfo formInfo) ManageRoomR
@@ -164,9 +158,9 @@ addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
 
 editRoomForm :: Maybe Room -> Form Room
 editRoomForm roomInfo = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
-        <$> pure (roomNumber <$> roomInfo)
+        <$> pure (fromJust $ roomNumber <$> roomInfo)
         <*> areq (selectFieldList authLevel) "预订权限" (roomLevel <$> roomInfo)
         <*> areq boolField "是否现在启用" (roomAvailable <$> roomInfo)
         <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
                                  "会议室有效期至" (roomValidTime <$> roomInfo)
-        <*> pure (roomFirstAdd roomInfo)
+        <*> pure (fromJust $ roomFirstAdd <$> roomInfo)

@@ -8,7 +8,7 @@
     <div class="col-md-4" align="left">
 
     <div class="col-md-8" id=#{editRoomFormId}>
-        <form class="form-horizontal control-label" method=post action=@{EditRoomR} enctype=#{formEnctype}>
+        <form class="form-horizontal control-label" method=post action=@{FinishEditRoomR theId} enctype=#{formEnctype}>
             ^{editRoomWidget}
             <input class="btn btn-primary" type="submit" value="保存">
         
