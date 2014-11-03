@@ -74,21 +74,36 @@ getListUserR = do
 getEditUserR :: Handler Html
 getEditUserR = do
     mayId <- lookupGetParam "editId"
-    liftIO $ print $ "edituser param: "
+    liftIO $ print $ "get edituser param: "
     liftIO $ print $ mayId
     let bValidData = isJust mayId
     if not bValidData
        then notFound
        else do
-            let theId = toSqlKey . read . unpack . fromJust $ mayId
-            userInfo <- runDB $ get404 (theId :: Key User)
+            let theId = (toSqlKey . read . unpack . fromJust $ mayId) :: UserId
+            userInfo <- runDB $ get404 theId
             (editUserWidget, formEnctype) <- generateFormPost (editUserForm userInfo)
             let submission = Nothing :: Maybe (FileInfo, Text)
                 handlerName = "getEditUserR" :: Text
-            
             defaultLayout $ do
                 editUserFormId <- newIdent
                 $(widgetFile "edituser")
+   
+postFinishEditUserR :: UserId -> Handler Html
+postFinishEditUserR theId = do
+    liftIO $ print theId
+    theInfo <- runDB $ get404 theId
+    ((result, formWidget), formEnctype) <- runFormPost (editUserForm theInfo)
+    let handlerName = "postEditUserR" :: Text
+    liftIO $ print result
+    case result of
+        FormSuccess formInfo -> do
+            runDB $ updateUserProfile theId formInfo {userEmail = (userEmail theInfo)}
+            defaultLayout $ do
+                backNavWidget ("用户信息已更新" :: Text) 
+                                   (toHtmlUserInfo formInfo) ManageUserR
+        _ -> defaultLayout $ do
+                 backNavWidget emptyText ("无效的用户信息, 请重新输入." :: Text) ManageUserR
 
 deleteDeleteUserR :: Handler Value
 deleteDeleteUserR = do

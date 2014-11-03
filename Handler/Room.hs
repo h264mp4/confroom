@@ -89,25 +89,20 @@ getEditRoomR = do
 
 postFinishEditRoomR :: RoomId -> Handler Html
 postFinishEditRoomR theId = do
-            liftIO $ print theId
-    -- let bValidData = isJust mayId
-    --if not bValidData
-    --   then notFound
-    --   else do
-            -- let theId = toSqlKey . read . unpack . fromJust $ mayId
-            theInfo <- runDB $ get404 theId
-            ((result, formWidget), formEnctype) <- runFormPost (editRoomForm . Just $ theInfo)
-            let handlerName = "postEditRoomR" :: Text
-            liftIO $ print result
-            case result of
-                FormSuccess formInfo -> do
-                    runDB $ updateRoomProfile theId formInfo {roomNumber = (roomNumber theInfo)}
-                    defaultLayout $ do
-                        backNavWidget ("会议室信息已更新" :: Text) 
-                                           (toHtmlRoomInfo formInfo) ManageRoomR
-                _ -> defaultLayout $ do
-                         backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
-            
+    liftIO $ print theId
+    theInfo <- runDB $ get404 theId
+    ((result, formWidget), formEnctype) <- runFormPost (editRoomForm . Just $ theInfo)
+    let handlerName = "postFinishEditRoomR" :: Text
+    liftIO $ print result
+    case result of
+        FormSuccess formInfo -> do
+            runDB $ updateRoomProfile theId formInfo {roomNumber = (roomNumber theInfo)}
+            defaultLayout $ do
+                backNavWidget ("会议室信息已更新" :: Text) 
+                                   (toHtmlRoomInfo formInfo) ManageRoomR
+        _ -> defaultLayout $ do
+                 backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
+    
 deleteDeleteRoomR :: Handler Value
 deleteDeleteRoomR = do
     texts <- rawRequestBody $$ CT.decode CT.utf8 =$ CL.consume
