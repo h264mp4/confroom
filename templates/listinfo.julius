@@ -77,10 +77,11 @@ $(document).ready(function() {
                     var key = editButtons[i][0];
                     var val = editButtons[i][1];
                     //console.log("EditButton" + i + ". Key: " + key + ", value: " + val);
-                    $("#"+key).attr({"btnid":key, "dbid":val});
-                    $("#"+key).click(function (){ 
-                        window.location.href = "@{editLink}/?editId=" + $(this).attr("dbid");
-                    });
+                    function(){ // use the closure to boost the var scope (using bv)
+                        $("#"+key).click(function (){ 
+                            window.location.href = "@{editLink}/" + val;
+                        });
+                    }
                 }
                 
                 for (i=0; i < deleteButtons.length; i++) {

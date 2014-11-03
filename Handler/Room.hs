@@ -69,7 +69,7 @@ getListRoomR = do
                               ]
 
 -- edit room will only edit the valid date / available / level
-getEditRoomR :: Handler Html
+getEditRoomR :: RoomId -> Handler Html
 getEditRoomR = do
     mayId <- lookupGetParam "editId"
     liftIO $ print $ "editroom param: "
@@ -80,9 +80,7 @@ getEditRoomR = do
        else do
             let theId = toSqlKey . read . unpack . fromJust $ mayId
             roomInfo <- runDB $ get404 (theId :: Key Room)
-            let roomNum = roomNumber roomInfo
-                validDay = roomValidTime roomInfo
-            (editRoomWidget, formEnctype) <- generateFormPost (editRoomForm roomNum validDay)
+            (editRoomWidget, formEnctype) <- generateFormPost (editRoomForm $ Just roomInfo)
             let submission = Nothing :: Maybe (FileInfo, Text)
                 handlerName = "getEditRoomR" :: Text
             
@@ -90,6 +88,32 @@ getEditRoomR = do
                 editRoomFormId <- newIdent
                 $(widgetFile "editroom")
 
+postEditRoomR :: Handler Html
+postEditRoomR  = do
+    mayId <- lookupGetParam "editId"
+    liftIO $ print $ "editroom param: "
+    liftIO $ print $ mayId
+    let bValidData = isJust mayId
+    if not bValidData
+       then notFound
+       else do
+            let theId = toSqlKey . read . unpack . fromJust $ mayId
+
+            ((result, formWidget), formEnctype) <- runFormPost (editRoomForm Nothing)
+            let handlerName = "postEditRoomR" :: Text
+            liftIO $ print result
+            case result of
+                FormSuccess formInfo -> do
+                    theInfo <- runDB $ get404 theId
+                    runDB $ updateRoomProfile theId formInfo {roomNumber = (roomNumber theInfo)}
+                    liftIO $ print ("Edit room done: ")
+                    liftIO $ print formInfo
+                    defaultLayout $ do
+                        backNavWidget ("会议室信息已更新" :: Text) 
+                                           (toHtmlRoomInfo formInfo) ManageRoomR
+                _ -> defaultLayout $ do
+                         backNavWidget emptyText ("无效的会议室信息, 请重新输入." :: Text) ManageRoomR
+            
 deleteDeleteRoomR :: Handler Value
 deleteDeleteRoomR = do
     texts <- rawRequestBody $$ CT.decode CT.utf8 =$ CL.consume
@@ -138,11 +162,11 @@ addRoomForm = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
                                  "会议室有效期至" (Just $ fromGregorian 2028 1 1)
         <*> lift (liftIO $ getCurrentTime)
 
-editRoomForm :: Text -> Day -> Form Room
-editRoomForm roomNumber validDay = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
-        <$> pure roomNumber
-        <*> areq (selectFieldList authLevel) "预订权限" Nothing
-        <*> areq boolField "是否现在启用" (Just True)
+editRoomForm :: Maybe Room -> Form Room
+editRoomForm roomInfo = renderBootstrap3 simpleFormLayoutForAddRoom $ Room
+        <$> pure (roomNumber <$> roomInfo)
+        <*> areq (selectFieldList authLevel) "预订权限" (roomLevel <$> roomInfo)
+        <*> areq boolField "是否现在启用" (roomAvailable <$> roomInfo)
         <*> areq (jqueryDayField def {jdsChangeMonth = True, jdsChangeYear = True}) 
-                                 "会议室有效期至" (Just validDay)
-        <*> lift (liftIO $ getCurrentTime)
+                                 "会议室有效期至" (roomValidTime <$> roomInfo)
+        <*> pure (roomFirstAdd roomInfo)

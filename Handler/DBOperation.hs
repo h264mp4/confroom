@@ -41,7 +41,7 @@ addNewUser newUser = do
             newUserId <- insert newUser
             return $ Just newUserId
 
-editUserProfile theUserId newInfo = do
+updateUserProfile theUserId newInfo = do
     -- only name, password and level can be editted.
     update theUserId [ UserName     =. (userName newInfo), 
                        UserPassword =. (userPassword newInfo),
@@ -70,7 +70,7 @@ addNewRoom newRoom = do
             newRoomId <- insert newRoom
             return $ Just newRoomId
 
-editRoomProfile theRoomId newInfo = do
+updateRoomProfile theRoomId newInfo = do
     -- Only the following field can be changed
     update theRoomId [ RoomAvailable =. (roomAvailable newInfo), 
                        RoomValidTime =. (roomValidTime newInfo),
